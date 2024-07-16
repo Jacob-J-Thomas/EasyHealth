@@ -1,19 +1,14 @@
-import { Counter } from "./components/Counter";
-import { FetchData } from "./components/FetchData";
-import { Home } from "./components/Home";
+import { ReadMe } from "./components/ReadMe";
+import { ChatInterface } from "./components/ChatInterface";
 
 const AppRoutes = [
   {
     index: true,
-    element: <Home />
-  },
-  {
-    path: '/counter',
-    element: <Counter />
+    element: <ChatInterface />
   },
   {
     path: '/fetch-data',
-    element: <FetchData />
+    element: <ReadMe />
   }
 ];
 
