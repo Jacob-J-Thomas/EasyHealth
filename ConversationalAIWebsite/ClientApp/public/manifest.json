@@ -1,6 +1,6 @@
 {
-  "short_name": "ConversationalAIWebsite",
-  "name": "ConversationalAIWebsite",
+  "short_name": "AiPocWebsiteTemplateWithBackend",
+  "name": "AiPocWebsiteTemplateWithBackend",
   "icons": [
     {
       "src": "favicon.ico",

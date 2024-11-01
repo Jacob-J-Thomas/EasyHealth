@@ -8,7 +8,7 @@
     }
   },
   "profiles": {
-    "ConversationalAIWebsite": {
+    "AiPocWebsiteTemplateWithBackend": {
       "commandName": "Project",
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7228;http://localhost:5200",

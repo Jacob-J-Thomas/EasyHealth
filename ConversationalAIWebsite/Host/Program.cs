@@ -1,10 +1,8 @@
-using ConversationalAIWebsite.Hubs;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using AiPocWebsiteTemplateWithBackend.API.Config;
+using IntelligenceHub.Host.Config;
 
-namespace ConversationalAIWebsite.Host
+namespace AiPocWebsiteTemplateWithBackend.Host
 {
     public class Program
     {
@@ -13,9 +11,12 @@ namespace ConversationalAIWebsite.Host
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            var insightSettings = builder.Configuration.GetRequiredSection(nameof(AppInsightSettings)).Get<AppInsightSettings>();
 
-            builder.Services.AddSingleton<AIHub>();
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddSingleton(builder.Configuration.GetRequiredSection(nameof(AIHubSettings)).Get<AIHubSettings>());
+            builder.Services.AddSingleton(builder.Configuration.GetRequiredSection(nameof(AuthSettings)).Get<AuthSettings>());
+            builder.Services.AddHttpClient();
 
             // Add SignalR
             builder.Services.AddSignalR();
@@ -26,20 +27,26 @@ namespace ConversationalAIWebsite.Host
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Conversational AI Website", Version = "v1" });
             });
 
+            // Add Logging via Application Insights
+            builder.Services.AddApplicationInsightsTelemetry(options =>
+            {
+                options.ConnectionString = insightSettings?.ConnectionString;
+            });
+
+            builder.Services.AddLogging(options =>
+            {
+                options.AddApplicationInsights();
+            });
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("CorsPolicy",
-                    builder => builder
-                        .WithOrigins("https://localhost:44483") // Replace with your client app/origin
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials());
+                options.AddPolicy("AllowAllOrigins", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
 
             var app = builder.Build();
 
             // Enable CORS
-            app.UseCors("CorsPolicy");
+            app.UseCors("AllowAllOrigins");
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -63,9 +70,6 @@ namespace ConversationalAIWebsite.Host
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller}/{action=Index}/{id?}");
-
-            // Map SignalR hubs
-            app.MapHub<AIHub>("/aiHub");
 
             // Map fallback route to serve index.html
             app.MapFallbackToFile("index.html");

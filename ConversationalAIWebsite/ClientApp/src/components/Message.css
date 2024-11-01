@@ -1,0 +1,83 @@
+﻿.message-container {
+    max-width: 75%;
+    width: fit-content;
+}
+
+.message-container.align-left {
+    margin-left: auto;
+    /* Add any additional styles for left alignment */
+}
+
+    /* Ensure text color for right-aligned messages */
+    .message-container.align-left .message {
+        color: white;
+    }
+
+
+.message-container.align-right {
+    margin-right: auto;
+    /* Add any additional styles for right alignment */
+}
+
+.message {
+    border-radius: 0.25rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: .25rem;
+    line-height: 1.8; /* Adjust to control text spacing */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.time-stamp {
+    margin-top: -1rem;
+    margin-left: inherit;
+    margin-right: inherit;
+    font-size: 0.75rem; /* Use rem for better scalability */
+    color: #6c757d;
+}
+
+.time-stamp.align-right {
+    text-align: left;
+}
+
+.time-stamp.align-left {
+    text-align: right;
+}
+
+.author {
+    margin-bottom: .25rem;
+    font-weight: bold;
+}
+
+.author.align-left {
+    text-align: right;
+}
+
+.author.align-right {
+    text-align: left;
+}
+
+pre {
+    color: #ffffff;
+    border-radius: .25rem;
+    padding: 1rem;
+    background-color: #030303;
+}
+
+.message ol,
+.message ul {
+    padding-left: 1.5rem; /* Add padding to lists for better readability */
+    margin: 0; /* Remove default margin */
+    color: white;
+}
+
+.message pre {
+    overflow-x: auto; /* Allow horizontal scrolling for code snippets */
+    white-space: pre-wrap; /* Allow code to wrap */
+    word-wrap: normal; /* Reset word-wrap for pre elements */
+    max-width: 100%; /* Ensure pre elements don't exceed the container width */
+}

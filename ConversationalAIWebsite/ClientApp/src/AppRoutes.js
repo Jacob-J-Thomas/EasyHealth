@@ -1,14 +1,11 @@
-import { ReadMe } from "./components/ReadMe";
-import { ChatInterface } from "./components/ChatInterface";
+//import { ReadMe } from "./components/ReadMe";
+//import ChatWindow from "./components/ChatWindow";
+import { Layout } from './components/Layout';
 
 const AppRoutes = [
   {
     index: true,
-    element: <ChatInterface />
-  },
-  {
-    path: '/fetch-data',
-    element: <ReadMe />
+    element: <Layout/>
   }
 ];
 

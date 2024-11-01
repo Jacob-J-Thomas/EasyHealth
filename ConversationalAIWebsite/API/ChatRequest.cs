@@ -1,10 +1,11 @@
-﻿namespace OpenAICustomFunctionCallingAPI.API.DTOs.Hub
+﻿using OpenAICustomFunctionCallingAPI.API.DTOs.Hub;
+
+namespace AiPocWebsiteTemplateWithBackend.API
 {
-    //string? profileName, Guid? conversationId, string? username, string? message)//, int? maxMessageHistory)//, string? database, string? ragTarget, int? maxRagDocs)
     public class ChatRequest
     {
-        public Guid? ConversationId { get; set; }
-        public string Username { get; set; }
-        public string Message { get; set; }
+        public Guid ConversationId { get; set; }
+        public ChatMessage ChatMessage { get; set; }
+        public string User { get; set; }
     }
 }
