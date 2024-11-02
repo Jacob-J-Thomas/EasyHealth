@@ -7,7 +7,7 @@ namespace AiPocWebsiteTemplateWithBackend.Business
     {
         private readonly AIClientWrapper _aiClient;
 
-        public PromptFlowLogic(AuthSettings authSettings, AIHubSettings aiSettings, IHttpClientFactory factory) 
+        public PromptFlowLogic(IntelligenceHubAuthSettings authSettings, AIHubSettings aiSettings, IHttpClientFactory factory) 
         {
             var authClient = new AIAuthClient(authSettings, factory);
             _aiClient = new AIClientWrapper(aiSettings.Endpoint, authClient);

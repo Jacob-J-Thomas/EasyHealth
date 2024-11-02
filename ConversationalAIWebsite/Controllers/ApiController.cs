@@ -3,7 +3,6 @@ using AiPocWebsiteTemplateWithBackend.API;
 using AiPocWebsiteTemplateWithBackend.API.Config;
 using AiPocWebsiteTemplateWithBackend.Business;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace AiPocWebsiteTemplateWithBackend.Controllers
 {
@@ -13,11 +12,9 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
     {
         private readonly AuthLogic _authLogic;
         private readonly PromptFlowLogic _promptFlowLogic;
-        private readonly ILogger<ApiController> _logger;
 
-        public ApiController(AuthSettings authSettings, AIHubSettings hubSettings, IHttpClientFactory factory, ILogger<ApiController> logger)
+        public ApiController(IntelligenceHubAuthSettings authSettings, AIHubSettings hubSettings, IHttpClientFactory factory)
         {
-            _logger = logger;
             _authLogic = new AuthLogic(authSettings, factory);
             _promptFlowLogic = new PromptFlowLogic(authSettings, hubSettings, factory);
         }

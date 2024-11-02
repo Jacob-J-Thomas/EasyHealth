@@ -1,6 +1,10 @@
 using Microsoft.OpenApi.Models;
 using AiPocWebsiteTemplateWithBackend.API.Config;
 using IntelligenceHub.Host.Config;
+using Microsoft.AspNetCore.Authentication;
+using AiPocWebsiteTemplateWithBackend.Host.Auth;
+using AiPocWebsiteTemplateWithBackend.Common;
+using AiPocWebsiteTemplateWithBackend.Host.Config;
 
 namespace AiPocWebsiteTemplateWithBackend.Host
 {
@@ -12,19 +16,51 @@ namespace AiPocWebsiteTemplateWithBackend.Host
 
             // Add services to the container.
             var insightSettings = builder.Configuration.GetRequiredSection(nameof(AppInsightSettings)).Get<AppInsightSettings>();
-
-            builder.Services.AddControllersWithViews();
             builder.Services.AddSingleton(builder.Configuration.GetRequiredSection(nameof(AIHubSettings)).Get<AIHubSettings>());
             builder.Services.AddSingleton(builder.Configuration.GetRequiredSection(nameof(AuthSettings)).Get<AuthSettings>());
+            builder.Services.AddSingleton(builder.Configuration.GetRequiredSection(nameof(IntelligenceHubAuthSettings)).Get<IntelligenceHubAuthSettings>());
+
             builder.Services.AddHttpClient();
 
-            // Add SignalR
-            builder.Services.AddSignalR();
+            builder.Services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy(AuthPolicies.FunctionCallingAuthPolicy, policy => policy.RequireAuthenticatedUser());
+            });
+
+            builder.Services.AddControllersWithViews();
 
             // Register Swagger generator
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Conversational AI Website", Version = "v1" });
+
+                // Add Basic Authentication
+                c.AddSecurityDefinition("BasicAuthentication", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter your username and password",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "basic"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "BasicAuthentication"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
             });
 
             // Add Logging via Application Insights
@@ -57,6 +93,9 @@ namespace AiPocWebsiteTemplateWithBackend.Host
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             // Enable Swagger UI
             app.UseSwagger();

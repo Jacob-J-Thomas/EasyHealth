@@ -15,7 +15,7 @@ namespace AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub
 
         private readonly string _authEndpoint;
 
-        public AIAuthClient(AuthSettings settings, IHttpClientFactory factory)
+        public AIAuthClient(IntelligenceHubAuthSettings settings, IHttpClientFactory factory)
         {
             _client = factory.CreateClient();
             _authEndpoint = settings.Endpoint;

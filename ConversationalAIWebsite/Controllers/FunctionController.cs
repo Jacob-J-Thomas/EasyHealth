@@ -1,8 +1,9 @@
 ﻿
 using AiPocWebsiteTemplateWithBackend.API.Config;
 using AiPocWebsiteTemplateWithBackend.Business;
+using AiPocWebsiteTemplateWithBackend.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace AiPocWebsiteTemplateWithBackend.Controllers
 {
@@ -13,19 +14,35 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
 
     [ApiController]
     [Route("[controller]")]
-    //[Authorize] // uncomment to enforce basic auth
+    [Authorize(Policy = AuthPolicies.FunctionCallingAuthPolicy)] // uncomment to enforce basic auth
     public class FunctionController : ControllerBase
     {
-        private readonly ILogger<ApiController> _logger;
+        private readonly AuthLogic _authLogic;
+        private readonly PromptFlowLogic _promptFlowLogic;
 
-        public FunctionController(ILogger<ApiController> logger)
+        public FunctionController(IntelligenceHubAuthSettings authSettings, AIHubSettings hubSettings, IHttpClientFactory factory)
         {
-            _logger = logger;
+            _authLogic = new AuthLogic(authSettings, factory);
+            _promptFlowLogic = new PromptFlowLogic(authSettings, hubSettings, factory);
         }
 
         // Add methods here and create a corresponding tool to execute code with the AI models.
 
         // Alternatively, you can define tools to target other APIs and return the HttpResponse to the calling client.
         // See the read me file's section on tool calling for more details.
+
+        [HttpGet("Test")]
+        public async Task<IActionResult> Test()
+        {
+            try
+            {
+                var result = await _promptFlowLogic.Test();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
+            }
+        }
     }
 }

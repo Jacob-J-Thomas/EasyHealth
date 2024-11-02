@@ -1,5 +1,4 @@
 ﻿using AiPocWebsiteTemplateWithBackend.API;
-using Microsoft.AspNetCore.SignalR.Client;
 using System.Net.Http.Headers;
 using Polly;
 using Polly.Retry;

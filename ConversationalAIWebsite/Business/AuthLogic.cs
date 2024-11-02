@@ -8,7 +8,7 @@ namespace AiPocWebsiteTemplateWithBackend.Business
     {
         private readonly AIAuthClient _authClient;
 
-        public AuthLogic(AuthSettings settings, IHttpClientFactory factory) 
+        public AuthLogic(IntelligenceHubAuthSettings settings, IHttpClientFactory factory) 
         {
             _authClient = new AIAuthClient(settings, factory);
         }

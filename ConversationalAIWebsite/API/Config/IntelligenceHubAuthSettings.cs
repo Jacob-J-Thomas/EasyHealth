@@ -3,7 +3,7 @@
 namespace AiPocWebsiteTemplateWithBackend.API.Config
 {
     // Currently also using this as the Auth DTO since this whole App needs a serious rework anyway
-    public class AuthSettings
+    public class IntelligenceHubAuthSettings
     {
         [JsonIgnore]
         public string Endpoint { get; set; } = string.Empty;
