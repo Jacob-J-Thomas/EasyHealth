@@ -4,13 +4,13 @@ using AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub;
 
 namespace AiPocWebsiteTemplateWithBackend.Business
 {
-    public class AuthLogic
+    public class AuthLogic : IAuthLogic
     {
-        private readonly AIAuthClient _authClient;
+        private readonly IAIAuthClient _authClient;
 
-        public AuthLogic(IntelligenceHubAuthSettings settings, IHttpClientFactory factory) 
+        public AuthLogic(IAIAuthClient authClient) 
         {
-            _authClient = new AIAuthClient(settings, factory);
+            _authClient = authClient;
         }
 
         public async Task<AuthTokenResponse?> RetrieveAuthToken()

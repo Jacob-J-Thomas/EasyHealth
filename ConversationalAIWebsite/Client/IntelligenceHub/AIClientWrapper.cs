@@ -1,14 +1,15 @@
 ﻿
-using AiPocTemplateWithBackend.Client.IntelligenceHub;
+using AiPocWebsiteTemplateWithBackend.API.Config;
+using static AiPocWebsiteTemplateWithBackend.API.GeneratedDTOs;
 
 namespace AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub
 {
-    public class AIClientWrapper : AIClient
+    public class AIClientWrapper : AIClient, IAIClientWrapper
     {
         // This class passes the authHandler to an httpClient, allowing all requests to be wrapped in the associated
         // authentication handler. There is an HttpClient in there as well to support simple rerequests
 
-        public AIClientWrapper(string baseUrl, AIAuthClient authClient) : base(baseUrl, new HttpClient(new AIAuthHandler(authClient, new HttpClientHandler())))
+        public AIClientWrapper(AIHubSettings hubSettings, AIAuthClient authClient) : base(hubSettings.Endpoint, new HttpClient(new AIAuthHandler(authClient, new HttpClientHandler())))
         {
         }
     }

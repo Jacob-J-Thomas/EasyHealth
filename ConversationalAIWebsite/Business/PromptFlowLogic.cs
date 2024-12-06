@@ -3,14 +3,13 @@ using AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub;
 
 namespace AiPocWebsiteTemplateWithBackend.Business
 {
-    public class PromptFlowLogic
+    public class PromptFlowLogic : IPromptFlowLogic
     {
-        private readonly AIClientWrapper _aiClient;
+        private readonly IAIClientWrapper _aiClient;
 
-        public PromptFlowLogic(IntelligenceHubAuthSettings authSettings, AIHubSettings aiSettings, IHttpClientFactory factory) 
+        public PromptFlowLogic(IAIClientWrapper aiClient) 
         {
-            var authClient = new AIAuthClient(authSettings, factory);
-            _aiClient = new AIClientWrapper(aiSettings.Endpoint, authClient);
+            _aiClient = aiClient;
         }
 
         // Methods can be added here to set up prompt flows executed by function calls (passed
@@ -21,9 +20,8 @@ namespace AiPocWebsiteTemplateWithBackend.Business
         public async Task<bool> Test()
         {
             var indexes = await _aiClient.GetAllProfilesAsync();
-
-            if (indexes.Count > 0) return true;
-            return false;
+            if (indexes == null || indexes.Count < 1) return false;
+            return true;
         }
     }
 }

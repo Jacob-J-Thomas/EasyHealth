@@ -2,7 +2,6 @@
 
 namespace AiPocWebsiteTemplateWithBackend.API.Config
 {
-    // Currently also using this as the Auth DTO since this whole App needs a serious rework anyway
     public class AuthRequest
     {
         [JsonPropertyName("grant_type")]

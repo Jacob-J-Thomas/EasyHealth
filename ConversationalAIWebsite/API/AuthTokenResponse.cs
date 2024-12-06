@@ -11,5 +11,4 @@ namespace AiPocWebsiteTemplateWithBackend.API
         [JsonPropertyName("tokens_type")]
         public string TokenType { get; set; }
     }
-
 }

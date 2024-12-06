@@ -17,13 +17,13 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
     [Authorize(Policy = AuthPolicies.FunctionCallingAuthPolicy)] // uncomment to enforce basic auth
     public class FunctionController : ControllerBase
     {
-        private readonly AuthLogic _authLogic;
-        private readonly PromptFlowLogic _promptFlowLogic;
+        private readonly IAuthLogic _authLogic;
+        private readonly IPromptFlowLogic _promptFlowLogic;
 
-        public FunctionController(IntelligenceHubAuthSettings authSettings, AIHubSettings hubSettings, IHttpClientFactory factory)
+        public FunctionController(IAuthLogic authLogic, IPromptFlowLogic promptLogic)
         {
-            _authLogic = new AuthLogic(authSettings, factory);
-            _promptFlowLogic = new PromptFlowLogic(authSettings, hubSettings, factory);
+            _authLogic = authLogic;
+            _promptFlowLogic = promptLogic;
         }
 
         // Add methods here and create a corresponding tool to execute code with the AI models.

@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub
 {
-    public class AIAuthClient
+    public class AIAuthClient : IAIAuthClient
     {
         private readonly HttpClient _client;
         private readonly AuthRequest _request;
@@ -22,7 +22,7 @@ namespace AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub
 
             _request = new AuthRequest()
             {
-                GrantType = settings.GrantType,
+                GrantType = "client_credentials",
                 ClientId = settings.DefaultClientId,
                 ClientSecret = settings.DefaultClientSecret,
                 Audience = settings.Audience,
@@ -30,7 +30,7 @@ namespace AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub
 
             _elevatedRequest = new AuthRequest()
             {
-                GrantType = settings.GrantType,
+                GrantType = "client_credentials",
                 ClientId = settings.AdminClientId,
                 ClientSecret = settings.AdminClientSecret,
                 Audience = settings.Audience,

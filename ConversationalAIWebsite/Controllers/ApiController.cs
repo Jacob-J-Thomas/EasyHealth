@@ -1,5 +1,4 @@
-﻿
-using AiPocWebsiteTemplateWithBackend.API;
+﻿using AiPocWebsiteTemplateWithBackend.API;
 using AiPocWebsiteTemplateWithBackend.API.Config;
 using AiPocWebsiteTemplateWithBackend.Business;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +9,13 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
     [Route("[controller]")]
     public class ApiController : ControllerBase
     {
-        private readonly AuthLogic _authLogic;
-        private readonly PromptFlowLogic _promptFlowLogic;
+        private readonly IAuthLogic _authLogic;
+        private readonly IPromptFlowLogic _promptFlowLogic;
 
-        public ApiController(IntelligenceHubAuthSettings authSettings, AIHubSettings hubSettings, IHttpClientFactory factory)
+        public ApiController(IAuthLogic authLogic, IPromptFlowLogic promptLogic)
         {
-            _authLogic = new AuthLogic(authSettings, factory);
-            _promptFlowLogic = new PromptFlowLogic(authSettings, hubSettings, factory);
+            _authLogic = authLogic;
+            _promptFlowLogic = promptLogic;
         }
 
         [HttpGet("Auth")]
@@ -53,7 +52,7 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }
         }
     }

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication;
 using AiPocWebsiteTemplateWithBackend.Host.Auth;
 using AiPocWebsiteTemplateWithBackend.Common;
 using AiPocWebsiteTemplateWithBackend.Host.Config;
+using AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub;
+using AiPocWebsiteTemplateWithBackend.Business;
 
 namespace AiPocWebsiteTemplateWithBackend.Host
 {
@@ -21,6 +23,13 @@ namespace AiPocWebsiteTemplateWithBackend.Host
             builder.Services.AddSingleton(builder.Configuration.GetRequiredSection(nameof(IntelligenceHubAuthSettings)).Get<IntelligenceHubAuthSettings>());
 
             builder.Services.AddHttpClient();
+
+            builder.Services.AddSingleton<AIAuthClient>();
+            builder.Services.AddSingleton<IAIAuthClient, AIAuthClient>();
+            builder.Services.AddSingleton<IAIClientWrapper, AIClientWrapper>();
+
+            builder.Services.AddScoped<IPromptFlowLogic, PromptFlowLogic>();
+            builder.Services.AddScoped<IAuthLogic, AuthLogic>();
 
             builder.Services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
