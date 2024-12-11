@@ -1,5 +1,6 @@
-﻿using AiPocWebsiteTemplateWithBackend.API.Config;
+﻿using AiPocWebsiteTemplateWithBackend.API;
 using AiPocWebsiteTemplateWithBackend.Client.IntelligenceHub;
+using static AiPocWebsiteTemplateWithBackend.API.GeneratedDTOs;
 
 namespace AiPocWebsiteTemplateWithBackend.Business
 {
@@ -7,21 +8,73 @@ namespace AiPocWebsiteTemplateWithBackend.Business
     {
         private readonly IAIClientWrapper _aiClient;
 
+        private const string _hangmanPlayerProfile = "HangmanPlayer";
+        private const string _wordGenProfile = "HangmanWordGenerator";
+
         public PromptFlowLogic(IAIClientWrapper aiClient) 
         {
             _aiClient = aiClient;
         }
 
-        // Methods can be added here to set up prompt flows executed by function calls (passed
-        // through the FunctionController) or via client requests to the ApiController. Of these
-        // two, utilizing the function controller is more secure, athlough currently only basic
-        // auth is supported
-
-        public async Task<bool> Test()
+        public async Task<HangmanGameData> StartHangmanGame(string word)
         {
-            var indexes = await _aiClient.GetAllProfilesAsync();
-            if (indexes == null || indexes.Count < 1) return false;
-            return true;
+            var messages = new List<Message>()
+            {
+                new Message()
+                {
+                    Content = $"Please start a new game of hangman. The word you will use for this game of hangman is '{word}'" +
+                              $"Remember that you should not share this word with the user.",
+                    Role = Role.User
+                }
+            };
+
+            var conversationId = Guid.NewGuid();
+            var request = new CompletionRequest()
+            {
+                ConversationId = conversationId,
+                Messages = messages
+            };
+
+            var attempts = 0;
+            var response = new CompletionResponse();
+            while ((response.Messages == null || !response.Messages.Any()) && attempts < 3)
+            {
+                response = await _aiClient.ChatAsync(_hangmanPlayerProfile, request);
+                attempts++;
+            }
+            return new HangmanGameData() 
+            { 
+                ConversationId = conversationId, 
+                Message = response.Messages?.LastOrDefault()?.Content ?? null,
+                Increment = false
+            };
+        }
+
+        public async Task<string?> GenerateHangmanWord()
+        {
+            var messages = new List<Message>()
+            {
+                new Message()
+                {
+                    // Configure additional instructions to set difficulty, word length, etc.
+                    Content = "Generate a new word.",
+                    Role = Role.User
+                }
+            };
+            var request = new CompletionRequest()
+            {
+                Messages = messages
+            };
+
+            var attempts = 0;
+            var word = string.Empty;
+            while ((string.IsNullOrEmpty(word) || word.Contains(" ")) && attempts < 3)
+            {
+                var response = await _aiClient.ChatAsync(_wordGenProfile, request);
+                word = response.Messages.LastOrDefault()?.Content;
+                attempts++;
+            }
+            return word;
         }
     }
 }

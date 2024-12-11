@@ -30,19 +30,5 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
 
         // Alternatively, you can define tools to target other APIs and return the HttpResponse to the calling client.
         // See the read me file's section on tool calling for more details.
-
-        [HttpGet("Test")]
-        public async Task<IActionResult> Test()
-        {
-            try
-            {
-                var result = await _promptFlowLogic.Test();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
-            }
-        }
     }
 }

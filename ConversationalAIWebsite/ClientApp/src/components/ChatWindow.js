@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as signalR from '@microsoft/signalr';
 import { v4 as uuidv4 } from 'uuid';
-import AuthClient from '../api/AuthClient'; // Import your AuthClient class
+import AuthClient from '../api/AuthClient';
+import ApiClient from '../api/ApiClient';
 import './ChatWindow.css';
 import { Message } from './Message';
 
@@ -9,13 +10,15 @@ const CHAT_API_URL = 'https://localhost:53337/chatstream';
 const CONNECTION_LOST_MESSAGE = "Oops! It seems I lost my connection. Could you please repeat your last message? If this issue persists, please contact support at applied.ai.help@gmail.com.";
 const CONNECTION_FAILED_MESSAGE = "It looks like I'm having trouble connecting to the server. Please ensure your internet connection is stable and try again, or contact support at applied.ai.help@gmail.com if this issue persists.";
 const authClient = new AuthClient("https://localhost:7228"); // Initialize AuthClient
+const apiClient = new ApiClient("https://localhost:7228"); // Initialize AuthClient
+let conversationId = "";
 
 function ChatWindow({ toggleSplit, isSmallViewport }) {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const chatEndRef = useRef(null);
     const [connection, setConnection] = useState(null);
-    const conversationId = useRef(uuidv4());
+    
     const [connectionError, setConnectionError] = useState(false);
     const hubConnectionErrorMessageSent = useRef(false);
     
@@ -26,6 +29,23 @@ function ChatWindow({ toggleSplit, isSmallViewport }) {
                 // Fetch the auth token
                 const tokenResponse = await authClient.authorize();
                 const accessToken = tokenResponse.access_token;
+
+                // Start a new Hangman Session
+                var gameData = await apiClient.startHangmanGame();
+
+                conversationId = gameData.conversationId;
+                const isFailedGuess = gameData.increment;
+                const gameStartMessage = gameData.message;
+
+                // Update messages with the Hangman game start response
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    {
+                        user: "Assistant",
+                        message: gameStartMessage,
+                        timestamp: new Date().toLocaleTimeString(),
+                    },
+                ]);
 
                 // Establish SignalR connection with the access token
                 const newConnection = new signalR.HubConnectionBuilder()
@@ -116,9 +136,9 @@ function ChatWindow({ toggleSplit, isSmallViewport }) {
             setMessages((prevMessages) => [...prevMessages, { user: "User", message: inputMessage, timestamp }]);
             setInputMessage('');
             const request = {
-                conversationId: conversationId.current,
+                conversationId: conversationId,
                 profileOptions: {
-                    name: "string", // default profile name
+                    name: "HangmanPlayer", // default profile name
                 },
                 messages: [
                     {

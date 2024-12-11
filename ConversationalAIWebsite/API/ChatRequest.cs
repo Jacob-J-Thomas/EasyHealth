@@ -1,4 +1,4 @@
-﻿using OpenAICustomFunctionCallingAPI.API.DTOs.Hub;
+﻿using AiPocWebsiteTemplateWithBackend.API.DTOs.Hub;
 
 namespace AiPocWebsiteTemplateWithBackend.API
 {

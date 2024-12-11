@@ -42,13 +42,16 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
             }
         }
 
-        [HttpGet("Test")]
-        public async Task<IActionResult> Test()
+        [HttpGet("Start/Hangman")]
+        public async Task<IActionResult> StartHangman()
         {
             try
             {
-                var result = await _promptFlowLogic.Test();
-                return Ok(result);
+                var word = await _promptFlowLogic.GenerateHangmanWord();
+                if (string.IsNullOrEmpty(word) || word.Contains(' ')) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when generating a word");
+                var gameStartResponse = await _promptFlowLogic.StartHangmanGame(word);
+                if (string.IsNullOrEmpty(gameStartResponse.Message)) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when starting the game");
+                return Ok(gameStartResponse);
             }
             catch (Exception ex)
             {
