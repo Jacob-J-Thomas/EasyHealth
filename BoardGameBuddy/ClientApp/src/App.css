@@ -1,0 +1,15 @@
+/* Resetting basic styles for consistency across browsers */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Ensure the entire app fills the viewport */
+html, body, #root, .App {
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* Prevent scrollbars during resizing */
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5; /* Subtle background for the app */
+}
