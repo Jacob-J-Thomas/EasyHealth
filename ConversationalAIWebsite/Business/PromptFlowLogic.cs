@@ -42,11 +42,10 @@ namespace AiPocWebsiteTemplateWithBackend.Business
                 response = await _aiClient.ChatAsync(_hangmanPlayerProfile, request);
                 attempts++;
             }
-            return new HangmanGameData() 
-            { 
-                ConversationId = conversationId, 
-                Message = response.Messages?.LastOrDefault()?.Content ?? null,
-                Increment = false
+            return new HangmanGameData()
+            {
+                ConversationId = conversationId,
+                Message = response.Messages?.LastOrDefault()?.Content ?? null
             };
         }
 
@@ -74,7 +73,8 @@ namespace AiPocWebsiteTemplateWithBackend.Business
                 word = response.Messages.LastOrDefault()?.Content;
                 attempts++;
             }
-            return word;
+            if (!string.IsNullOrEmpty(word) && !word.Contains(" ")) return word;
+            return null;
         }
     }
 }

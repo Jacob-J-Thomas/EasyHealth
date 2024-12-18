@@ -15,8 +15,8 @@ function ContentWindow({ stage }) {
 
     return (
         <div className="pane">
-            <h1>Hangman Game</h1>
-            <ReactSVG src={`/assets/hangman/stage6.svg`} />
+            <h1>AI Hangman</h1>
+            <ReactSVG src={`/assets/hangman/${stages[stage]}`} />
         </div>
     );
 }

@@ -1,5 +1,4 @@
 ﻿using AiPocWebsiteTemplateWithBackend.API;
-using AiPocWebsiteTemplateWithBackend.API.Config;
 using AiPocWebsiteTemplateWithBackend.Business;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,13 +41,26 @@ namespace AiPocWebsiteTemplateWithBackend.Controllers
             }
         }
 
-        [HttpGet("Start/Hangman")]
-        public async Task<IActionResult> StartHangman()
+        [HttpGet("GenerateWord")]
+        public async Task<IActionResult> GetHangmanWord()
         {
             try
             {
                 var word = await _promptFlowLogic.GenerateHangmanWord();
                 if (string.IsNullOrEmpty(word) || word.Contains(' ')) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when generating a word");
+                return Ok(word);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+            }
+        }
+
+        [HttpGet("Start/{word}")]
+        public async Task<IActionResult> StartHangman([FromRoute] string word)
+        {
+            try
+            {
                 var gameStartResponse = await _promptFlowLogic.StartHangmanGame(word);
                 if (string.IsNullOrEmpty(gameStartResponse.Message)) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when starting the game");
                 return Ok(gameStartResponse);
