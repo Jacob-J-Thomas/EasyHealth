@@ -4,7 +4,6 @@ using BoardGameBuddy.Business;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Moq;
-using static BoardGameBuddy.API.GeneratedDTOs;
 
 namespace BoardGameBuddy.Tests.Integration
 {
