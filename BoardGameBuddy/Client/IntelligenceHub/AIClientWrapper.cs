@@ -1,6 +1,5 @@
 ﻿
 using BoardGameBuddy.API.Config;
-using static BoardGameBuddy.API.GeneratedDTOs;
 
 namespace BoardGameBuddy.Client.IntelligenceHub
 {

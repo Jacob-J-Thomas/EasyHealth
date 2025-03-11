@@ -1,6 +1,5 @@
 ﻿using BoardGameBuddy.API;
 using BoardGameBuddy.Client.IntelligenceHub;
-using static BoardGameBuddy.API.GeneratedDTOs;
 
 namespace BoardGameBuddy.Business
 {
@@ -62,6 +61,7 @@ namespace BoardGameBuddy.Business
             };
             var request = new CompletionRequest()
             {
+                ProfileOptions = new Profile() { Name = _wordGenProfile }, // pass in 
                 Messages = messages
             };
 
@@ -69,7 +69,7 @@ namespace BoardGameBuddy.Business
             var word = string.Empty;
             while ((string.IsNullOrEmpty(word) || word.Contains(" ")) && attempts < 3)
             {
-                var response = await _aiClient.ChatAsync(_wordGenProfile, request);
+                var response = await _aiClient.ChatAsync(request);
                 word = response.Messages.LastOrDefault()?.Content;
                 attempts++;
             }
