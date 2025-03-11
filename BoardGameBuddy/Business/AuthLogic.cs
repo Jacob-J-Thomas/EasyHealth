@@ -1,5 +1,4 @@
 ﻿using BoardGameBuddy.API;
-using BoardGameBuddy.API.Config;
 using BoardGameBuddy.Client.IntelligenceHub;
 
 namespace BoardGameBuddy.Business
