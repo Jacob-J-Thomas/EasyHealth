@@ -4,7 +4,6 @@ using BoardGameBuddy.Business;
 using BoardGameBuddy.Client.IntelligenceHub;
 using Moq;
 using Xunit;
-using static BoardGameBuddy.API.GeneratedDTOs;
 
 namespace BoardGameBuddy.Tests.Unit.Business
 {
@@ -97,7 +96,7 @@ namespace BoardGameBuddy.Tests.Unit.Business
                 }
             };
 
-            _mockAiClient.Setup(x => x.ChatAsync(It.IsAny<string>(), It.IsAny<CompletionRequest>()))
+            _mockAiClient.Setup(x => x.ChatAsync(It.IsAny<CompletionRequest>()))
                 .ReturnsAsync(aiResponse);
 
             // Act
@@ -125,7 +124,7 @@ namespace BoardGameBuddy.Tests.Unit.Business
                 }
             });
 
-            _mockAiClient.Setup(x => x.ChatAsync(It.IsAny<string>(), It.IsAny<CompletionRequest>()))
+            _mockAiClient.Setup(x => x.ChatAsync(It.IsAny<CompletionRequest>()))
                 .ReturnsAsync(() => responses.Dequeue());
 
             // Act
@@ -133,7 +132,7 @@ namespace BoardGameBuddy.Tests.Unit.Business
 
             // Assert
             Assert.Equal(validWord, result);
-            _mockAiClient.Verify(x => x.ChatAsync(It.IsAny<string>(), It.IsAny<CompletionRequest>()), Times.Exactly(2));
+            _mockAiClient.Verify(x => x.ChatAsync(It.IsAny<CompletionRequest>()), Times.Exactly(2));
         }
 
         [Fact]
@@ -148,7 +147,7 @@ namespace BoardGameBuddy.Tests.Unit.Business
                 }
             };
 
-            _mockAiClient.Setup(x => x.ChatAsync(It.IsAny<string>(), It.IsAny<CompletionRequest>()))
+            _mockAiClient.Setup(x => x.ChatAsync(It.IsAny<CompletionRequest>()))
                 .ReturnsAsync(invalidResponse);
 
             // Act
