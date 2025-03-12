@@ -4,41 +4,49 @@ import { Link } from 'react-router-dom';
 import './NavMenu.css';
 
 export class NavMenu extends Component {
-  static displayName = NavMenu.name;
+    static displayName = NavMenu.name;
 
-  constructor (props) {
-    super(props);
+    constructor() {
+        super();
+        this.toggleNavbar = this.toggleNavbar.bind(this);
+        this.state = {
+            collapsed: true
+        };
+    }
 
-    this.toggleNavbar = this.toggleNavbar.bind(this);
-    this.state = {
-      collapsed: true
-    };
-  }
+    toggleNavbar() {
+        this.setState({
+            collapsed: !this.state.collapsed
+        });
+    }
 
-  toggleNavbar () {
-    this.setState({
-      collapsed: !this.state.collapsed
-    });
-  }
+    render() {
+        const { pathname } = window.location;
 
-  render() {
-    return (
-      <header>
-        <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>
-          <NavbarBrand tag={Link} to="/">A Conversational AI Website</NavbarBrand>
-          <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
-          <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
-            <ul className="navbar-nav flex-grow">
-              <NavItem>
-                <NavLink tag={Link} className="text-dark" to="/">Chat</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink tag={Link} className="text-dark" to="/">Read Me</NavLink>
-              </NavItem>
-            </ul>
-          </Collapse>
-        </Navbar>
-      </header>
-    );
-  }
+        return (
+            <header>
+                <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom mb-3" container light>
+                    <div className="navbar-content-container">
+                        <div className="d-flex flex-column align-items-start">
+                            <NavbarBrand tag={Link} to="/">NLSequal</NavbarBrand>
+                            <h3 className="navbar-subtitle">A Natural Language to SQL Conversion Tool</h3>
+                        </div>
+                        <div className="nav-collapse-bottom">
+                            <div className="navbar-nav">
+                                <NavItem>
+                                    <NavLink tag={Link} className={`text-dark ${pathname === '/' ? 'active' : ''}`} to="/api">Convert SQL</NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink tag={Link} className={`text-dark ${pathname === '/api' ? 'active' : ''}`} to="/">API Reference</NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink tag={Link} className={`text-dark ${pathname === '/api' ? 'active' : ''}`} to="/">Contact Us</NavLink>
+                                </NavItem>
+                            </div>
+                        </div>
+                    </div>
+                </Navbar>
+            </header>
+        );
+    }
 }

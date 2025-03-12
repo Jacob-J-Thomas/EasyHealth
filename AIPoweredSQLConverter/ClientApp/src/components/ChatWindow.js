@@ -7,7 +7,7 @@ function ChatWindow({ toggleSplit, isSmallViewport, messages, sendMessage }) {
     const chatEndRef = useRef(null);
 
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        //chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
     const handleSendMessage = () => {
@@ -30,21 +30,17 @@ function ChatWindow({ toggleSplit, isSmallViewport, messages, sendMessage }) {
                 <div ref={chatEndRef} />
             </div>
             <div className="chat-input">
-                <input
-                    type="text"
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                />
-                <button onClick={handleSendMessage}>Send</button>
-                <button
-                    className="toggleSplit"
-                    onClick={toggleSplit}
-                    style={{ display: isSmallViewport ? 'none' : 'block' }}
-                >
-                    Toggle Split
-                </button>
+                <div className="chat-input-input-container">
+                    <label>SQL Conversion Assistant</label>
+                    <input
+                        type="text"
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        placeholder="Enter a natural language query to convert to SQL..."
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    />
+                </div>
+                <button className="toolbar-button" onClick={handleSendMessage}>Convert</button>
             </div>
         </div>
     );

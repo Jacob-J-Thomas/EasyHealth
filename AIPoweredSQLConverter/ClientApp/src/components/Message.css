@@ -1,23 +1,23 @@
 ﻿.message-container {
     max-width: 75%;
     width: fit-content;
+    background-color: #2e2e2e; /* Darker background for message container */
+    color: #e0e0e0; /* Light text color for contrast */
 }
 
-.message-container.align-left {
-    margin-left: auto;
-    /* Add any additional styles for left alignment */
-}
-
-    /* Ensure text color for right-aligned messages */
-    .message-container.align-left .message {
-        color: white;
+    .message-container.align-left {
+        margin-left: auto;
+        /* Add any additional styles for left alignment */
     }
 
+        .message-container.align-left .message {
+            color: #e0e0e0; /* Ensure text color for left-aligned messages */
+        }
 
-.message-container.align-right {
-    margin-right: auto;
-    /* Add any additional styles for right alignment */
-}
+    .message-container.align-right {
+        margin-right: auto;
+        /* Add any additional styles for right alignment */
+    }
 
 .message {
     border-radius: 0.25rem;
@@ -30,6 +30,7 @@
     white-space: normal;
     max-width: 100%;
     box-sizing: border-box;
+    background-color: #3e3e3e; /* Darker background for messages */
 }
 
 .time-stamp {
@@ -37,29 +38,29 @@
     margin-left: inherit;
     margin-right: inherit;
     font-size: 0.75rem; /* Use rem for better scalability */
-    color: #6c757d;
+    color: #b0b0b0; /* Lighter color for timestamps */
 }
 
-.time-stamp.align-right {
-    text-align: left;
-}
+    .time-stamp.align-right {
+        text-align: left;
+    }
 
-.time-stamp.align-left {
-    text-align: right;
-}
+    .time-stamp.align-left {
+        text-align: right;
+    }
 
 .author {
     margin-bottom: .25rem;
     font-weight: bold;
 }
 
-.author.align-left {
-    text-align: right;
-}
+    .author.align-left {
+        text-align: right;
+    }
 
-.author.align-right {
-    text-align: left;
-}
+    .author.align-right {
+        text-align: left;
+    }
 
 pre {
     color: #ffffff;

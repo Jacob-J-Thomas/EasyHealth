@@ -9,7 +9,17 @@
 html, body, #root, .App {
     height: 100%;
     width: 100%;
-    overflow: hidden; /* Prevent scrollbars during resizing */
     font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5; /* Subtle background for the app */
+    background-color: #1e1e1e; /* Dark background for the app */
+    color: #e0e0e0; /* Light text color for contrast */
+    overflow-x: hidden;
 }
+
+
+/* Allow overflow in the WindowWrapper component */
+.WindowWrapper {
+    height: 100%;
+    width: 100%;
+    overflow: auto; /* Allow scrollbars */
+}
+

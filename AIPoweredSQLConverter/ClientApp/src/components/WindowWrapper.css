@@ -1,43 +1,60 @@
-﻿/* Styling each pane inside the SplitPane */
+﻿/* Container for the entire window wrapper */
+.window-wrapper-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding-left: 2em;
+    padding-right: 2em;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding is included in width calculation */
+}
+
+/* Styling each pane inside the SplitPane */
 .pane {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;  /* Ensure panes fill available space */
-  flex: 1;
-  overflow: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center; /* Center the content horizontally */
+    overflow: auto;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    flex: 1;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin-bottom: 1em;
 }
 
-/* Ensure the SplitPane component stretches to fill the entire app */
+/* Ensure the SplitPane component stretches to fill the content container */
 .SplitPane {
-  height: 100%;
-  width: 100%;
-}
-
-.SplitPane.horizontal .pane {
-  max-height: 100%; /* Constrain the height */
-  overflow-y: auto; /* Vertical scrollbar only when needed */
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-}
-
-/* Styling the Resizer (divider) between panes */
-.SplitPane .Resizer {
-  background: #ccc;
-  z-index: 1;  /* Ensure the resizer stays on top */
-  transition: all 0.2s ease;
-}
-
-.SplitPane.vertical .Resizer {
-  width: .5em;
-  cursor: col-resize;
-}
-
-.SplitPane.horizontal .Resizer {
-  height: .5em;
-  cursor: row-resize;
+    position: relative;
+    width: 100%;
+    max-width: 80vw;
+    height: 100%;
 }
 
 .Resizer:hover {
-  background-color: #aaa;
+    background-color: #333;
+}
+
+.chatwindow-label {
+    display: block; /* Ensure the label is a block element */
+    margin-left: 1em;
+    margin-bottom: -.7em;
+    z-index: 1;
+    font-size: 1rem;
+    color: #e0e0e0; /* Light text color */
+}
+
+/* Footer styling */
+.footer {
+    width: 100%;
+    text-align: center;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-size: 0.8rem;
 }

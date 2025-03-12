@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AppRoutes from './AppRoutes';
 import { Layout } from './components/Layout';
-import MainWindowPanes from './components/WindowWrapper';
+import WindowWrapper from './components/WindowWrapper';
 import './App.css';
 
 export default class App extends Component {
@@ -11,7 +11,7 @@ export default class App extends Component {
     render() {
         return (
             <Layout>
-                <MainWindowPanes />
+                <WindowWrapper />
                 <Routes>
                     {AppRoutes.map((route, index) => {
                         const { element, ...rest } = route;

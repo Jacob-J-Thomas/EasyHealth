@@ -6,6 +6,7 @@ import ChatWindow from './ChatWindow';
 import ContentWindow from './ContentWindow';
 import AuthClient from '../api/AuthClient';
 import ApiClient from '../api/ApiClient';
+import { NavMenu } from './NavMenu'; // Imported NavMenu
 import './WindowWrapper.css';
 
 const authClient = new AuthClient("https://localhost:7228");
@@ -21,38 +22,38 @@ export default class WindowWrapper extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            size: '30%',  // Default size to 30%
-            isSmallViewport: window.innerWidth < 1200, // Add state for isSmallViewport
-            split: window.innerWidth < 1200 ? 'horizontal' : 'vertical',  // Default split to horizontal if isSmallViewport is true
+            size: window.innerWidth < 1200 ? '25%' : '50%',
+            isSmallViewport: window.innerWidth < 1200,
+            split: window.innerWidth < 1200 ? 'horizontal' : 'vertical',
             minSize: 0,
             maxSize: 0,
             stage: 0,
             conversationId: '',
             gameStartMessage: '',
-            accessToken: '', // Add state for accessToken
-            messages: [], // Add state for messages
-            connectionError: false, // Add state for connection error
+            accessToken: '',
+            messages: [],
+            connectionError: false,
         };
         this.chatEndRef = React.createRef();
         this.updateSizes = this.updateSizes.bind(this);
         this.checkViewportSize = this.checkViewportSize.bind(this);
         this.toggleSplit = this.toggleSplit.bind(this);
-        this.scrollToBottom = this.scrollToBottom.bind(this);
-        this.handleResize = debounce(this.handleResize.bind(this), 50); // Adjust delay if needed
+        //this.scrollToBottom = this.scrollToBottom.bind(this);
+        this.handleResize = debounce(this.handleResize.bind(this), 50);
         this.setStage = this.setStage.bind(this);
         this.startHangmanGame = this.startHangmanGame.bind(this);
         this.establishConnection = this.establishConnection.bind(this);
         this.addMessageToUI = this.addMessageToUI.bind(this);
         this.sendMessageToBackend = this.sendMessageToBackend.bind(this);
-        this.sendMessage = this.sendMessage.bind(this); // Bind sendMessage method
+        this.sendMessage = this.sendMessage.bind(this);
     }
 
     async componentDidMount() {
-        this.updateSizes(); 
-        this.checkViewportSize(); // Initial check
+        this.updateSizes();
+        this.checkViewportSize();
         window.addEventListener('resize', this.updateSizes);
         window.addEventListener('resize', this.checkViewportSize);
-        await this.startHangmanGame(); // Start the hangman game
+        await this.startHangmanGame();
     }
 
     componentWillUnmount() {
@@ -73,7 +74,6 @@ export default class WindowWrapper extends Component {
             const conversationId = gameData.conversationId;
             const messageJsonData = gameData.message;
 
-            // Parse the messageJsonData JSON string
             const parsedMessageData = JSON.parse(messageJsonData);
             const gameStartMessage = parsedMessageData.message;
             const isFailedGuess = parsedMessageData.increment;
@@ -81,11 +81,11 @@ export default class WindowWrapper extends Component {
             this.setState((prevState) => ({
                 conversationId,
                 gameStartMessage,
-                stage: isFailedGuess ? prevState.stage + 1 : prevState.stage, // Increment stage if isFailedGuess is true
-                accessToken, // Set accessToken in state
+                stage: isFailedGuess ? prevState.stage + 1 : prevState.stage,
+                accessToken,
             }), () => {
-                this.addMessageToUI(gameStartMessage, "Assistant"); // Add the initial message without sending to backend
-                this.establishConnection(); // Establish connection after setting state
+                this.addMessageToUI(gameStartMessage, "Assistant");
+                this.establishConnection();
             });
         } catch (error) {
             console.error('Failed to start hangman game: ', error);
@@ -96,12 +96,11 @@ export default class WindowWrapper extends Component {
         try {
             const { accessToken } = this.state;
 
-            // Establish SignalR connection with the access token
             const newConnection = new signalR.HubConnectionBuilder()
                 .withUrl(CHAT_API_URL, {
-                    accessTokenFactory: () => accessToken, // Use the access token for authentication
+                    accessTokenFactory: () => accessToken,
                 })
-                .withAutomaticReconnect() // Automatically reconnect
+                .withAutomaticReconnect()
                 .build();
 
             let messageBuffer = '';
@@ -111,10 +110,8 @@ export default class WindowWrapper extends Component {
                 const messageChunk = response.completionUpdate;
                 const timestamp = new Date().toLocaleTimeString();
 
-                // Accumulate message chunks
                 messageBuffer += messageChunk;
 
-                // Check if the buffer contains a complete JSON object
                 try {
                     const parsedMessageData = JSON.parse(messageBuffer);
                     const message = parsedMessageData.message;
@@ -123,8 +120,6 @@ export default class WindowWrapper extends Component {
                     this.setState((prevState) => {
                         const updatedMessages = [...prevState.messages];
                         const lastMessage = prevState.messages[prevState.messages.length - 1];
-
-                        // Ensure stage does not exceed 6
                         const newStage = isFailedGuess ? Math.min(prevState.stage + 1, 6) : prevState.stage;
 
                         if (lastMessage && lastMessage.user === author) {
@@ -138,7 +133,7 @@ export default class WindowWrapper extends Component {
                         } else if (newStage >= 6) {
                             updatedMessages.push({
                                 user: author,
-                                message: `Oh no, it looks like you ran out of guesses! The word was '${hangmanWord}'. Please refresh the page to play again.`, // This refresh could be triggered via a tool call
+                                message: `Oh no, it looks like you ran out of guesses! The word was '${hangmanWord}'. Please refresh the page to play again.`,
                                 timestamp: timestamp,
                             });
                         } else if (message && message.trim() !== "") {
@@ -156,9 +151,8 @@ export default class WindowWrapper extends Component {
                     });
 
                     console.log(`Received chunk from AIHub: ${author}: ${message}`);
-                    messageBuffer = ''; // Clear the buffer after successful parsing
+                    messageBuffer = '';
                 } catch (e) {
-                    // If JSON.parse fails, it means the buffer does not contain a complete JSON object yet
                     console.log('Waiting for more message chunks...');
                 }
             });
@@ -183,7 +177,7 @@ export default class WindowWrapper extends Component {
             await newConnection.start();
             console.log('Connected to SignalR hub');
             this.setState({ connection: newConnection, connectionError: false });
-            this.hubConnectionErrorMessageSent = false; // Reset the flag when connection is successful
+            this.hubConnectionErrorMessageSent = false;
         } catch (error) {
             console.error('Connection failed: ', error);
             if (!this.hubConnectionErrorMessageSent) {
@@ -218,7 +212,7 @@ export default class WindowWrapper extends Component {
             const request = {
                 conversationId: conversationId,
                 profileOptions: {
-                    name: "HangmanPlayer", // default profile name
+                    name: "HangmanPlayer",
                 },
                 messages: [
                     {
@@ -243,7 +237,7 @@ export default class WindowWrapper extends Component {
     }
 
     updateSizes() {
-        const { split } = this.state; // Use the latest split value
+        const { split } = this.state;
         const viewportSize = split === 'vertical' ? window.innerWidth : window.innerHeight;
 
         this.setState({
@@ -256,13 +250,15 @@ export default class WindowWrapper extends Component {
         if (window.innerWidth < 1200) {
             this.setState((prevState) => ({
                 split: 'horizontal',
-                size: prevState.isSmallViewport ? prevState.size : '50%', // Only update size if isSmallViewport is false
+                size: prevState.isSmallViewport ? prevState.size : '50%',
                 isSmallViewport: true
             }));
         } else {
-            this.setState({
+            this.setState((prevState) => ({
+                split: 'vertical',
+                size: prevState.isSmallViewport ? '50%' : prevState.size,
                 isSmallViewport: false
-            });
+            }));
         }
     }
 
@@ -270,15 +266,15 @@ export default class WindowWrapper extends Component {
         this.setState(
             (prevState) => ({
                 split: prevState.split === 'vertical' ? 'horizontal' : 'vertical',
-                size: '30%', // Reset size when toggling
+                size: '30%',
             }),
-            this.updateSizes // Ensure sizes are recalculated with the new split state
+            this.updateSizes
         );
     }
 
-    scrollToBottom() {
-        this.chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
+    //scrollToBottom() {
+    //    this.chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    //}
 
     handleResize(newSize) {
         this.setState({ size: newSize });
@@ -290,27 +286,35 @@ export default class WindowWrapper extends Component {
 
     render() {
         return (
-            <SplitPane
-                split={this.state.split}
-                minSize={this.state.minSize}
-                maxSize={this.state.maxSize}
-                size={this.state.size}    // Use controlled size
-                primary="second" // set the primary to the chat window to ensure proper resizing
-                onDragFinished={this.handleResize}  // Use handleResize for debounced updates
-            >
-                <div className="pane">
-                    <ContentWindow stage={this.state.stage} />
+            <div className="window-wrapper-container">
+                <NavMenu></NavMenu>
+                <SplitPane
+                    style={{ position: 'relative', width: '100%', height: '100%' }}
+                    split={this.state.split}
+                    minSize={this.state.minSize}
+                    maxSize={this.state.maxSize}
+                    size={this.state.size}
+                    primary="second"
+                    onDragFinished={this.handleResize}
+                >
+                    <div className="pane">
+                        <ContentWindow stage={this.state.stage} />
+                    </div>
+                    <div className="pane">
+                        <label className="chatwindow-label">SQL Query Converter</label>
+                        <ChatWindow
+                            toggleSplit={this.toggleSplit}
+                            isSmallViewport={this.state.isSmallViewport}
+                            messages={this.state.messages}
+                            sendMessage={this.sendMessage}
+                        />
+                        <div ref={this.chatEndRef} />
+                    </div>
+                </SplitPane>
+                <div className="footer">
+                    <p>&copy; 2025 Applied AI Inc. All rights reserved.</p>
                 </div>
-                <div className="pane">
-                    <ChatWindow
-                        toggleSplit={this.toggleSplit}
-                        isSmallViewport={this.state.isSmallViewport} // Pass isSmallViewport to ChatWindow
-                        messages={this.state.messages} // Pass messages to ChatWindow
-                        sendMessage={this.sendMessage} // Pass sendMessage to ChatWindow
-                    />
-                    <div ref={this.chatEndRef} />
-                </div>
-            </SplitPane>
+            </div>
         );
     }
 }
