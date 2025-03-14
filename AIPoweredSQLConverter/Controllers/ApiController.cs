@@ -17,55 +17,85 @@ namespace AIPoweredSQLConverter.Controllers
             _promptFlowLogic = promptLogic;
         }
 
-        [HttpGet("Auth")]
-        public async Task<IActionResult> Authorize()
+        [HttpGet("get/newAPIKey/{username}")]
+        public async Task<IActionResult> GetNewAPIKey([FromRoute] string username)
         {
             try
             {
-                var result = await _authLogic.RetrieveAuthToken();
-                if (result?.AccessToken == null) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
+                if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
 
-                // scrub unnescessary data
-                var clientSafeResult = new AuthTokenResponse()
-                {
-                    AccessToken = result.AccessToken,
-                    ExpiresIn = result.ExpiresIn,
-                };
+                //var result = await _authLogic.RetrieveAuthToken();
+                //if (result?.AccessToken == null) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
 
-                return Ok(clientSafeResult);
-                
+                //// scrub unnescessary data
+                //var clientSafeResult = new AuthTokenResponse()
+                //{
+                //    AccessToken = result.AccessToken,
+                //    ExpiresIn = result.ExpiresIn,
+                //};
+
+                //return Ok(clientSafeResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
             }
         }
 
-        [HttpGet("GenerateWord")]
-        public async Task<IActionResult> GetHangmanWord()
+        [HttpPost("/post/sqlData")]
+        public async Task<IActionResult> SaveSQLData([FromBody] FrontEndRequest requestBody)
         {
             try
             {
-                var word = await _promptFlowLogic.GenerateHangmanWord();
-                if (string.IsNullOrEmpty(word) || word.Contains(' ')) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when generating a word");
-                return Ok(word);
+                if (requestBody == null) return BadRequest("The request body is malformed.");
+                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
+                if (string.IsNullOrEmpty(requestBody.SqlData)) return BadRequest("The SQL data is required.");
+
+                var success = await _promptFlowLogic.UpsertUserSQLProfile(requestBody);
+                if (success) return NoContent();
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when saving the SQL data");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }
         }
 
-        [HttpGet("Start/{word}")]
-        public async Task<IActionResult> StartHangman([FromRoute] string word)
+        [HttpPost("/post/sqlHelp")]
+        public async Task<IActionResult> RequestSQLDataHelp([FromBody] FrontEndRequest requestBody)
         {
             try
             {
-                var gameStartResponse = await _promptFlowLogic.StartHangmanGame(word);
-                if (string.IsNullOrEmpty(gameStartResponse.Message)) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when starting the game");
-                return Ok(gameStartResponse);
+                if (requestBody == null) return BadRequest("The request body is malformed.");
+                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
+                if (string.IsNullOrEmpty(requestBody.SqlData)) return BadRequest("The SQL data is required.");
+                if (string.IsNullOrEmpty(requestBody.Query)) return BadRequest("The query is required.");
+
+                var response = await _promptFlowLogic.GetSQLDataHelp(requestBody);
+                if (!string.IsNullOrEmpty(response)) return Ok(response);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when constructing the SQL definition.");
             }
-            catch (Exception ex)
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+            }
+        }
+
+        [HttpPost("/post/convertQuery")]
+        public async Task<IActionResult> ConvertQueryToSQL([FromBody] FrontEndRequest requestBody)
+        {
+            try
+            {
+                if (requestBody == null) return BadRequest("The request body is malformed.");
+                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
+                if (string.IsNullOrEmpty(requestBody.Query)) return BadRequest("The query is required.");
+                if (requestBody.ConversationId == null) return BadRequest("The conversationId is required.");
+
+                var response = await _promptFlowLogic.ConvertQueryToSQL(requestBody);
+                if (!string.IsNullOrEmpty(response)) return Ok(response);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when converting the string to SQL.");
+            }
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }

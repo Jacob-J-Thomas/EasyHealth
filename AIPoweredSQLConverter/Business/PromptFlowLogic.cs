@@ -7,74 +7,66 @@ namespace AIPoweredSQLConverter.Business
     {
         private readonly IAIClientWrapper _aiClient;
 
-        private const string _hangmanPlayerProfile = "HangmanPlayer";
-        private const string _wordGenProfile = "HangmanWordGenerator";
+        private const string _sqlDataConstructionProfile = "NLSequelDataConstructionHelper";
+        private const string _sqlConversionProfile = "NLSequelConversionProfile-";
+        private const string _conversionProfileSystemMessage = "Your job is to convert any natural language you receive into an SQL " +
+            "command or query. If the user fails to provide a database name, you should either ask for one, or provide a placeholder. " +
+            "If the request is unrelated to constructing an SQL command or query, respond with nothing but the word 'NULL'. Below is " +
+            "a database construction string delimited with tripple backticks. Please use it when converting the natural language " +
+            "strings to SQL.\n\n";
 
         public PromptFlowLogic(IAIClientWrapper aiClient) 
         {
             _aiClient = aiClient;
         }
 
-        public async Task<HangmanGameData> StartHangmanGame(string word)
+        public async Task<bool> UpsertUserSQLProfile(FrontEndRequest request)
         {
-            var messages = new List<Message>()
+            var profile = new Profile()
             {
-                new Message()
-                {
-                    Content = $"Please start a new game of hangman. The word you will use for this game of hangman is '{word}'" +
-                              $"Remember that you should not share this word with the user.",
-                    Role = Role.User
-                }
+                Name = _sqlConversionProfile + request.Username,
+                SystemMessage = _conversionProfileSystemMessage + $"```\n{request.SqlData}\n```",
+                MaxTokens = 1200,
+                MaxMessageHistory = 20,
+                Host = AGIServiceHosts.Azure,
+                Model = "gpt-4o",
             };
 
-            var conversationId = Guid.NewGuid();
-            var request = new CompletionRequest()
-            {
-                ConversationId = conversationId,
-                Messages = messages
-            };
+            var response = await _aiClient.UpsertProfileAsync(profile);
 
-            var attempts = 0;
-            var response = new CompletionResponse();
-            while ((response.Messages == null || !response.Messages.Any()) && attempts < 3)
-            {
-                response = await _aiClient.ChatAsync(_hangmanPlayerProfile, request);
-                attempts++;
-            }
-            return new HangmanGameData()
-            {
-                ConversationId = conversationId,
-                Message = response.Messages?.LastOrDefault()?.Content ?? null
-            };
+            return true;
         }
 
-        public async Task<string?> GenerateHangmanWord()
+        public async Task<string?> GetSQLDataHelp(FrontEndRequest request)
         {
-            var messages = new List<Message>()
+            var completionContent = $"{request.Query}\n\n" +
+                $"SQL Data:\n\n{request.SqlData}";
+
+            var completion = new CompletionRequest()
             {
-                new Message()
+                ProfileOptions = new Profile() { Name = _sqlDataConstructionProfile },
+                Messages = new List<Message>()
                 {
-                    // Configure additional instructions to set difficulty, word length, etc.
-                    Content = "Generate a new word.",
-                    Role = Role.User
+                    new Message() { Content = completionContent, Role = Role.User, TimeStamp = DateTime.UtcNow }
+                },
+            };
+            var completionResponse = await _aiClient.ChatAsync(completion);
+            return completionResponse.Messages?.LastOrDefault()?.Content ?? null;
+        }
+
+        public async Task<string?> ConvertQueryToSQL(FrontEndRequest request)
+        {
+            var completion = new CompletionRequest()
+            {
+                ConversationId = request.ConversationId,
+                ProfileOptions = new Profile() { Name = _sqlConversionProfile + request.Username },
+                Messages = new List<Message>()
+                {
+                    new Message() { Content = request.Query, Role = Role.User, TimeStamp = DateTime.UtcNow }
                 }
             };
-            var request = new CompletionRequest()
-            {
-                ProfileOptions = new Profile() { Name = _wordGenProfile }, // pass in 
-                Messages = messages
-            };
-
-            var attempts = 0;
-            var word = string.Empty;
-            while ((string.IsNullOrEmpty(word) || word.Contains(" ")) && attempts < 3)
-            {
-                var response = await _aiClient.ChatAsync(request);
-                word = response.Messages.LastOrDefault()?.Content;
-                attempts++;
-            }
-            if (!string.IsNullOrEmpty(word) && !word.Contains(" ")) return word;
-            return null;
+            var completionResponse = await _aiClient.ChatAsync(completion);
+            return completionResponse.Messages?.LastOrDefault()?.Content ?? null;
         }
     }
 }

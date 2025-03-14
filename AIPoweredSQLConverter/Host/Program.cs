@@ -1,12 +1,13 @@
 using Microsoft.OpenApi.Models;
 using AIPoweredSQLConverter.API.Config;
 using IntelligenceHub.Host.Config;
-using Microsoft.AspNetCore.Authentication;
-using AIPoweredSQLConverter.Host.Auth;
 using AIPoweredSQLConverter.Common;
 using AIPoweredSQLConverter.Host.Config;
 using AIPoweredSQLConverter.Client.IntelligenceHub;
 using AIPoweredSQLConverter.Business;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
 
 namespace AIPoweredSQLConverter.Host
 {
@@ -31,32 +32,55 @@ namespace AIPoweredSQLConverter.Host
             builder.Services.AddScoped<IPromptFlowLogic, PromptFlowLogic>();
             builder.Services.AddScoped<IAuthLogic, AuthLogic>();
 
-            builder.Services.AddAuthentication("BasicAuthentication")
-                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+            #region Authentication
 
+            // Configure Auth
+            var authSettings = builder.Configuration.GetRequiredSection(nameof(AuthSettings)).Get<AuthSettings>();
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = authSettings.Domain;
+                options.Audience = authSettings.Audience;
+
+                // Specify the Role Claim Type if necessary
+                //options.TokenValidationParameters = new TokenValidationParameters
+                //{
+                //    RoleClaimType = "roles"
+                //};
+            });
+
+            // Add role-based authorization policies
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy(AuthPolicies.FunctionCallingAuthPolicy, policy => policy.RequireAuthenticatedUser());
+                options.AddPolicy(AuthPolicies.PayingUserAuthPolicy, policy =>
+                    policy.RequireAssertion(context =>
+                        context.User.HasClaim(c => (c.Type == "scope" || c.Type == "permissions") && c.Value.Split(' ').Contains("all:elevated"))));
             });
+            #endregion
 
             builder.Services.AddControllersWithViews();
 
             // Register Swagger generator
-            builder.Services.AddSwaggerGen(c =>
+            builder.Services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Conversational AI Website", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Conversational AI Website", Version = "v1" });
 
-                // Add Basic Authentication
-                c.AddSecurityDefinition("BasicAuthentication", new OpenApiSecurityScheme
+                // Define the security scheme for bearer tokens
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    In = ParameterLocation.Header,
-                    Description = "Please enter your username and password",
                     Name = "Authorization",
                     Type = SecuritySchemeType.Http,
-                    Scheme = "basic"
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' followed by a space and the JWT token."
                 });
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                // Apply the security scheme globally
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
@@ -64,10 +88,10 @@ namespace AIPoweredSQLConverter.Host
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "BasicAuthentication"
+                                Id = "Bearer"
                             }
                         },
-                        new string[] {}
+                        Array.Empty<string>()
                     }
                 });
             });

@@ -2,6 +2,6 @@
 {
     public class AuthPolicies
     {
-        public const string FunctionCallingAuthPolicy = "FunctionCallingAuthPolicy";
+        public const string PayingUserAuthPolicy = "FunctionCallingAuthPolicy";
     }
 }

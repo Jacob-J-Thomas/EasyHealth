@@ -2,7 +2,10 @@ import React, { Component } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AppRoutes from './AppRoutes';
 import { Layout } from './components/Layout';
-import WindowWrapper from './components/WindowWrapper';
+import ProtectedWindowWrapper from './components/ProtectedWindowWrapper';
+import ApiReference from './components/ApiReference';
+import HomePage from './components/HomePage';
+import Callback from './components/Callback';
 import './App.css';
 
 export default class App extends Component {
@@ -11,12 +14,12 @@ export default class App extends Component {
     render() {
         return (
             <Layout>
-                <WindowWrapper />
                 <Routes>
-                    {AppRoutes.map((route, index) => {
-                        const { element, ...rest } = route;
-                        return <Route key={index} {...rest} element={element} />;
-                    })}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/api" element={<ProtectedWindowWrapper />} />
+                    <Route path="/reference" element={<ApiReference />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/callback" element={<Callback />} />
                 </Routes>
             </Layout>
         );

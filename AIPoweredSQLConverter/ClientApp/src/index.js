@@ -7,28 +7,48 @@ import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { Auth0Provider } from '@auth0/auth0-react';
+import authConfig from './auth_config.json';
 
 // Initialize Application Insights
-function initializeAppInsights() {
-    const appInsights = new ApplicationInsights({
-        config: {
-            instrumentationKey: 'YOUR_INSTRUMENTATION_KEY' // Replace with your actual instrumentation key
-        }
-    });
-    appInsights.loadAppInsights();
-    return appInsights;
-}
+//function initializeAppInsights() {
+//    const appInsights = new ApplicationInsights({
+//        config: {
+//            instrumentationKey: 'YOUR_INSTRUMENTATION_KEY' // Replace with your actual instrumentation key
+//        }
+//    });
+//    appInsights.loadAppInsights();
+//    return appInsights;
+//}
 
-const appInsights = initializeAppInsights();
+//const appInsights = initializeAppInsights();
+
+const onRedirectCallback = (appState) => {
+    window.history.replaceState(
+        {},
+        document.title,
+        appState?.returnTo || window.location.pathname
+    );
+};
 
 const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
 
 root.render(
-    <BrowserRouter basename={baseUrl}>
-        <App />
-    </BrowserRouter>
+    <Auth0Provider
+        domain={authConfig.domain}
+        clientId={authConfig.clientId}
+        redirectUri={window.location.origin}
+        onRedirectCallback={onRedirectCallback}
+        authorizationParams={{
+            authorizeTimeoutInSeconds: 60 // Set timeout in seconds
+        }}
+    >
+        <BrowserRouter basename={baseUrl}>
+            <App />
+        </BrowserRouter>
+    </Auth0Provider>
 );
 
 // If you want your app to work offline and load faster, you can change
@@ -40,5 +60,6 @@ serviceWorkerRegistration.unregister();
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals(metric => {
-    appInsights.trackMetric({ name: metric.name, average: metric.value });
+    //appInsights.trackMetric({ name: metric.name, average: metric.value });
+    console.log("App Insight Metric Written:\n", { name: metric.name, average: metric.value });
 });

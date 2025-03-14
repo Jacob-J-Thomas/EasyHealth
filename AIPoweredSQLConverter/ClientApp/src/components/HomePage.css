@@ -1,0 +1,41 @@
+﻿.home-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.home-page-content {
+    max-width: 80vw;
+    width: 100%;
+    background-color: #2e2e2e;
+    color: #e0e0e0;
+    padding: 2em;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+    .home-page-content h1, .home-page-content h2 {
+        font-family: 'Roboto Mono', monospace;
+        color: #ffffff;
+    }
+
+    .home-page-content p {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #e0e0e0;
+        line-height: 1.6;
+    }
+
+.contact-details, .usage-info {
+    margin-top: 1.5em;
+}
+
+    .contact-details a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        .contact-details a:hover {
+            text-decoration: underline;
+        }

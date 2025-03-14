@@ -14,7 +14,7 @@ namespace AIPoweredSQLConverter.Controllers
 
     [ApiController]
     [Route("[controller]")]
-    [Authorize(Policy = AuthPolicies.FunctionCallingAuthPolicy)] // uncomment to enforce basic auth
+    [Authorize(Policy = AuthPolicies.PayingUserAuthPolicy)] // uncomment to enforce basic auth
     public class FunctionController : ControllerBase
     {
         private readonly IAuthLogic _authLogic;

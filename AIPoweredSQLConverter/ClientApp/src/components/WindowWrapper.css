@@ -26,7 +26,7 @@
     color: #e0e0e0;
     padding-left: 1em;
     padding-right: 1em;
-    margin-bottom: 1em;
+    margin-bottom: 4em;
 }
 
 /* Ensure the SplitPane component stretches to fill the content container */
@@ -50,11 +50,8 @@
     color: #e0e0e0; /* Light text color */
 }
 
-/* Footer styling */
-.footer {
-    width: 100%;
-    text-align: center;
-    background-color: #1e1e1e;
-    color: #e0e0e0;
-    font-size: 0.8rem;
+@media (max-width: 1200px) {
+    .window-wrapper-container {
+        height: 140vh;
+    }
 }

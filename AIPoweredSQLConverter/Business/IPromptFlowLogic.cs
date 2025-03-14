@@ -4,7 +4,8 @@ namespace AIPoweredSQLConverter.Business
 {
     public interface IPromptFlowLogic
     {
-        Task<string?> GenerateHangmanWord();
-        Task<HangmanGameData> StartHangmanGame(string word);
+        Task<bool> UpsertUserSQLProfile(FrontEndRequest request);
+        Task<string?> GetSQLDataHelp(FrontEndRequest request);
+        Task<string?> ConvertQueryToSQL(FrontEndRequest request);
     }
 }

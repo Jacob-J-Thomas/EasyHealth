@@ -47,8 +47,8 @@ function ContentWindow({ stage, onTableDefinitionsChange }) {
                             onChange={handleAssistantInputChange}
                         />
                     </div>
-                    <button className="toolbar-button" onClick={handleSend}>Send</button>
-                    <button className="toolbar-button" onClick={handleSave}>Save</button>
+                    <button className="toolbar-button" /*onClick={handleSend}*/>Send</button>
+                    <button className="toolbar-button" /*onClick={handleSend}*/>Save</button>
                 </div>
             </div>
         </div>

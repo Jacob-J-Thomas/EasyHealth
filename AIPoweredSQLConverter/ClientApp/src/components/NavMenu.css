@@ -28,7 +28,7 @@ a.navbar-brand {
     text-align: left;
     word-break: break-all;
     color: #000000; /* Slightly lighter off-white color */
-    font-size: 1.5rem; /* Increased size */
+    font-size: 2rem; /* Increased size */
     font-weight: bold; /* Bold text */
     position: relative;
 }
@@ -96,6 +96,26 @@ a.navbar-brand {
         .nav-link.active::after {
             transform: scaleX(1);
         }
+
+
+/* Container for the logout button placed above the nav items */
+.nav-collapse-bottom {
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: flex-end; /* Align children to the right */
+    gap: 0.5rem; /* Optional: adds spacing between rows */
+}
+
+.logout-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; /* Align the logout button to the right */
+    margin-bottom: 0.5rem; /* Add spacing below the logout button */
+}
+
+
+
 
 html {
     font-size: 14px;
