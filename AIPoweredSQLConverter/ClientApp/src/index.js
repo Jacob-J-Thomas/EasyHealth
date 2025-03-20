@@ -6,9 +6,36 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { Auth0Provider } from '@auth0/auth0-react';
 import authConfig from './auth_config.json';
+
+const onRedirectCallback = (appState) => {
+    window.history.replaceState(
+        {},
+        document.title,
+        appState?.returnTo || window.location.pathname
+    );
+};
+
+const rootElement = document.getElementById('root');
+const root = createRoot(rootElement);
+
+root.render(
+    <Auth0Provider
+        domain={authConfig.domain}
+        clientId={authConfig.clientId}
+        authorizationParams={{
+            redirect_uri: authConfig.redirectUri, // Ensure this matches auth_config.json
+            audience: authConfig.audience,
+            scope: authConfig.scope,
+        }}
+        onRedirectCallback={onRedirectCallback}
+    >
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </Auth0Provider>
+);
 
 // Initialize Application Insights
 //function initializeAppInsights() {
@@ -22,34 +49,6 @@ import authConfig from './auth_config.json';
 //}
 
 //const appInsights = initializeAppInsights();
-
-const onRedirectCallback = (appState) => {
-    window.history.replaceState(
-        {},
-        document.title,
-        appState?.returnTo || window.location.pathname
-    );
-};
-
-const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
-const rootElement = document.getElementById('root');
-const root = createRoot(rootElement);
-
-root.render(
-    <Auth0Provider
-        domain={authConfig.domain}
-        clientId={authConfig.clientId}
-        redirectUri={window.location.origin}
-        onRedirectCallback={onRedirectCallback}
-        authorizationParams={{
-            authorizeTimeoutInSeconds: 60 // Set timeout in seconds
-        }}
-    >
-        <BrowserRouter basename={baseUrl}>
-            <App />
-        </BrowserRouter>
-    </Auth0Provider>
-);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

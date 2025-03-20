@@ -4,8 +4,9 @@ namespace AIPoweredSQLConverter.Business
 {
     public interface IPromptFlowLogic
     {
-        Task<bool> UpsertUserSQLProfile(FrontEndRequest request);
+        Task<bool> UpsertUserData(FrontEndRequest request);
         Task<string?> GetSQLDataHelp(FrontEndRequest request);
+        string? GetSQLData(string username);
         Task<string?> ConvertQueryToSQL(FrontEndRequest request);
     }
 }

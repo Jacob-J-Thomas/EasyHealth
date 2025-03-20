@@ -1,0 +1,5 @@
+﻿CREATE TABLE UserData (
+    Username NVARCHAR(450) NOT NULL PRIMARY KEY,
+    EncryptedApiKey NVARCHAR(MAX) NULL,
+    UserSQLData NVARCHAR(4000) NULL
+);

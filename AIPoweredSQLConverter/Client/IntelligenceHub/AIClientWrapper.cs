@@ -8,7 +8,8 @@ namespace AIPoweredSQLConverter.Client.IntelligenceHub
         // This class passes the authHandler to an httpClient, allowing all requests to be wrapped in the associated
         // authentication handler. There is an HttpClient in there as well to support simple rerequests
 
-        public AIClientWrapper(AIHubSettings hubSettings, AIAuthClient authClient) : base(hubSettings.Endpoint, new HttpClient(new AIAuthHandler(authClient, new HttpClientHandler())))
+        // Audeince is the same as the API endpoint
+        public AIClientWrapper(IntelligenceHubAuthSettings hubSettings, AIAuthClient authClient) : base(hubSettings.Audience, new HttpClient(new AIAuthHandler(authClient, new HttpClientHandler())))
         {
         }
     }

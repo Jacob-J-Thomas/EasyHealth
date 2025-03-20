@@ -1,4 +1,4 @@
-﻿import React, { Component } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import SplitPane from 'react-split-pane';
 import { useAuth0 } from '@auth0/auth0-react';
 import { debounce } from 'lodash';
@@ -6,18 +6,16 @@ import ChatWindow from './ChatWindow';
 import ContentWindow from './ContentWindow';
 import FooterSection from './FooterSection';
 import ApiClient from '../api/ApiClient';
-import { NavMenu } from './NavMenu'; // Imported NavMenu
+import { NavMenu } from './NavMenu';
 import './WindowWrapper.css';
+import authConfig from '../auth_config.json';
 
-const domain = 'https://localhost:7228';
-const apiClient = new ApiClient(domain);
-
-const CONNECTION_LOST_MESSAGE = "Oops! It seems I lost my connection. Could you please repeat your last message? If this issue persists, please contact support at applied.ai.help@gmail.com.";
-const CONNECTION_FAILED_MESSAGE = "It looks like I'm having trouble connecting to the server. Please ensure your internet connection is stable and try again, or contact support at applied.ai.help@gmail.com if this issue persists.";
+const InnapropriateRequestErrorMessage = "Your last message was flagged as unrelated to SQL. Please check your input.";
 
 const WindowWrapper = () => {
-    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-    const [state, setState] = React.useState({
+    const { isAuthenticated, getAccessTokenSilently, user } = useAuth0();
+    const [state, setState] = useState({
+        tableDefinitions: '',
         size: window.innerWidth < 1200 ? '50%' : '50%',
         isSmallViewport: window.innerWidth < 1200,
         split: window.innerWidth < 1200 ? 'horizontal' : 'vertical',
@@ -31,47 +29,146 @@ const WindowWrapper = () => {
         connectionError: false,
     });
 
-    React.useEffect(() => {
+    // Initialize API client
+    const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
+
+    // Load messages from localStorage on mount
+    useEffect(() => {
+        const savedMessages = localStorage.getItem('messages');
+        if (savedMessages) {
+            setState((prevState) => ({
+                ...prevState,
+                messages: JSON.parse(savedMessages),
+            }));
+        }
+    }, []);
+
+    // Save messages to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('messages', JSON.stringify(state.messages));
+    }, [state.messages]);
+
+    useEffect(() => {
         const initialize = async () => {
             if (isAuthenticated) {
-                //const token = await getAccessTokenSilently();
-                //setState((prevState) => ({
-                //    ...prevState,
-                //    accessToken: token,
-                //}));
-                //await startHangmanGame(token);
+                try {
+                    const token = await getAccessTokenSilently({
+                        audience: authConfig.audience,
+                    });
+                    setState((prevState) => ({
+                        ...prevState,
+                        accessToken: token,
+                    }));
+                } catch (error) {
+                    console.error("Error fetching access token");
+                }
+
+                try {
+                    const sqlData = await apiClient.getSQLData(user.email);
+                    setState((prevState) => ({
+                        ...prevState,
+                        tableDefinitions: sqlData,
+                    }));
+                } catch (error) {
+                    console.error('Error fetching SQL data:', error.message);
+                }
             }
         };
         initialize();
     }, [isAuthenticated, getAccessTokenSilently]);
 
-    //const startHangmanGame = async (token) => {
-    //    try {
-    //        const hangmanWord = await apiClient.getHangmanWord();
-    //        const gameData = await apiClient.startHangmanGame(hangmanWord, token);
-    //        const conversationId = gameData.conversationId;
-    //        const messageJsonData = gameData.message;
+    const requestSQLConversion = async (inputMessage) => {
+        if (!user || !user.email) {
+            console.error('User is not authenticated or username is missing');
+            return;
+        }
 
-    //        const parsedMessageData = JSON.parse(messageJsonData);
-    //        const gameStartMessage = parsedMessageData.message;
-    //        const isFailedGuess = parsedMessageData.increment;
+        const username = user.email;
+        const newMessage = {
+            role: 'User',
+            content: inputMessage,
+        };
+        const updatedMessages = [...state.messages, newMessage];
 
-    //        setState((prevState) => ({
-    //            ...prevState,
-    //            conversationId,
-    //            gameStartMessage,
-    //            stage: isFailedGuess ? prevState.stage + 1 : prevState.stage,
-    //        }));
-    //    } catch (error) {
-    //        console.error('Failed to start hangman game: ', error);
-    //    }
-    //};
+        setState((prevState) => ({
+            ...prevState,
+            messages: updatedMessages,
+        }));
 
-    // Other methods and render function remain the same
+        try {
+            const response = await apiClient.requestSQLConversion(username, updatedMessages, state.tableDefinitions);
+            if (response) {
+                const responseMessage = {
+                    role: 'Assistant',
+                    content: response,
+                };
+                setState((prevState) => ({
+                    ...prevState,
+                    messages: [...prevState.messages, responseMessage],
+                }));
+            }
+        } catch (error) {
+            console.error('Error during SQL conversion request:', error.message);
+        }
+    };
+
+    const handleAssistantSend = async (assistantInput) => {
+        if (!user || !user.email) {
+            console.error('User is not authenticated or email is missing');
+            return;
+        }
+
+        const username = user.email;
+
+        try {
+            const response = await apiClient.requestSQLDataHelp(username, assistantInput, state.tableDefinitions);
+            if (response.inappropriate) {
+                const errorMessage = {
+                    role: 'Assistant',
+                    content: InnapropriateRequestErrorMessage
+                };
+                setState((prevState) => ({
+                    ...prevState,
+                    messages: [...prevState.messages, errorMessage],
+                }));
+            } else {
+                setState((prevState) => ({
+                    ...prevState,
+                    tableDefinitions: response.response,
+                }));
+            }
+        } catch (error) {
+            console.error('Error during SQL data help request:', error.message);
+        }
+    };
+
+    const handleSave = async (tableDefinitions) => {
+        if (!user || !user.email) {
+            console.error('User is not authenticated or email is missing');
+            return;
+        }
+
+        const username = user.email;
+
+        try {
+            await apiClient.saveSQLData(username, tableDefinitions);
+        } catch (error) {
+            console.error('Error saving SQL data:', error.message);
+        }
+    };
+
+    // clearMessages resets the messages state and localStorage entry
+    const clearMessages = () => {
+        setState((prevState) => ({
+            ...prevState,
+            messages: []
+        }));
+        localStorage.removeItem('messages');
+    };
 
     return (
         <div className="window-wrapper-container">
-            <NavMenu></NavMenu>
+            <NavMenu />
             <SplitPane
                 style={{ position: 'relative', width: '100%', height: '100%' }}
                 split={state.split}
@@ -79,31 +176,43 @@ const WindowWrapper = () => {
                 maxSize={state.maxSize}
                 size={state.size}
                 primary="second"
-                onDragFinished={debounce((newSize) => setState({ size: newSize }), 50)}
+                onDragFinished={debounce(
+                    (newSize) =>
+                        setState((prevState) => ({
+                            ...prevState,
+                            size: newSize,
+                        })),
+                    50
+                )}
             >
                 <div className="pane">
-                    <ContentWindow stage={state.stage} />
+                    <ContentWindow
+                        tableDefinitions={state.tableDefinitions}
+                        onAssistantSend={handleAssistantSend}
+                        onSave={handleSave}
+                    />
                 </div>
                 <div className="pane">
                     <label className="chatwindow-label">SQL Query Converter</label>
                     <ChatWindow
-                        toggleSplit={() => setState((prevState) => ({
-                            split: prevState.split === 'vertical' ? 'horizontal' : 'vertical',
-                            size: '50%',
-                        }))}
+                        toggleSplit={() =>
+                            setState((prevState) => ({
+                                ...prevState,
+                                split: prevState.split === 'vertical' ? 'horizontal' : 'vertical',
+                                size: '50%',
+                            }))
+                        }
                         isSmallViewport={state.isSmallViewport}
                         messages={state.messages}
                         sendMessage={(inputMessage) => {
-                            setState((prevState) => ({
-                                messages: [...prevState.messages, { user: 'User', message: inputMessage, timestamp: new Date().toLocaleTimeString() }],
-                            }));
-                            // sendMessageToBackend(inputMessage);
+                            requestSQLConversion(inputMessage);
                         }}
+                        clearMessages={clearMessages}
                     />
                     <div ref={React.createRef()} />
                 </div>
             </SplitPane>
-            <FooterSection></FooterSection>
+            <FooterSection />
         </div>
     );
 };

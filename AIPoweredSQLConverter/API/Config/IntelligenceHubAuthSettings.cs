@@ -7,7 +7,6 @@ namespace AIPoweredSQLConverter.API.Config
     {
         [JsonIgnore]
         public string Endpoint { get; set; } = string.Empty;
-        public string GrantType { get; set; } = string.Empty;
         public string AdminClientId { get; set; } = string.Empty;
         public string AdminClientSecret { get; set; } = string.Empty;
         public string DefaultClientId { get; set; } = string.Empty;

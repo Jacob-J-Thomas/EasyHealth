@@ -1,19 +1,19 @@
 /* ContentWindow.css */
 .split-pane {
-    height: 100%; /* Ensure the split pane takes the full viewport height */
-    width: 100%; /* Ensure the split pane takes the full width */
+    height: 100%;
+    width: 100%;
 }
 
 .component-container {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Align items to the start */
-    align-items: flex-start; /* Align items to the start */
-    background-color: #1e1e1e; /* Dark background for panes */
-    height: 100%; /* Ensure the pane fills the available vertical space */
-    width: 100%; /* Ensure the pane fills the available horizontal space */
-    flex: 1; /* Allow the pane to grow and shrink as needed */
-    color: #e0e0e0; /* Light text color for contrast */
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: #1e1e1e;
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    color: #e0e0e0;
 }
 
 .pane {

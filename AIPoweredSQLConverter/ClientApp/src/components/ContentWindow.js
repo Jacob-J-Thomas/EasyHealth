@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ContentWindow.css';
 
-function ContentWindow({ stage, onTableDefinitionsChange }) {
-    const [tableDefinitions, setTableDefinitions] = useState('');
+function ContentWindow({ tableDefinitions, onAssistantSend, onSave }) {
+    const [localTableDefinitions, setLocalTableDefinitions] = useState('');
     const [assistantInput, setAssistantInput] = useState('');
+
+    useEffect(() => {
+        setLocalTableDefinitions(tableDefinitions);
+    }, [tableDefinitions]);
 
     const handleInputChange = (event) => {
         const value = event.target.value;
-        setTableDefinitions(value);
+        setLocalTableDefinitions(value);
     };
 
     const handleAssistantInputChange = (event) => {
@@ -15,12 +19,13 @@ function ContentWindow({ stage, onTableDefinitionsChange }) {
         setAssistantInput(value);
     };
 
-    const handleSave = () => {
-        onTableDefinitionsChange(tableDefinitions);
+    const handleSend = () => {
+        onAssistantSend(assistantInput);
+        setAssistantInput('');
     };
 
-    const handleSend = () => {
-
+    const handleSave = () => {
+        onSave(localTableDefinitions);
     };
 
     return (
@@ -29,7 +34,7 @@ function ContentWindow({ stage, onTableDefinitionsChange }) {
                 <label className="table-definitions-label">SQL Table Definition(s)</label>
                 <textarea
                     className="table-definitions-input"
-                    value={tableDefinitions}
+                    value={localTableDefinitions}
                     onChange={handleInputChange}
                     rows="10"
                     cols="50"
@@ -47,8 +52,8 @@ function ContentWindow({ stage, onTableDefinitionsChange }) {
                             onChange={handleAssistantInputChange}
                         />
                     </div>
-                    <button className="toolbar-button" /*onClick={handleSend}*/>Send</button>
-                    <button className="toolbar-button" /*onClick={handleSend}*/>Save</button>
+                    <button className="toolbar-button" onClick={handleSend}>Send</button>
+                    <button className="toolbar-button" onClick={handleSave}>Save</button>
                 </div>
             </div>
         </div>

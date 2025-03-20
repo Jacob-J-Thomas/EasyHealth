@@ -11,11 +11,12 @@
     }
 
         .message-container.align-left .message {
-            color: #e0e0e0; /* Ensure text color for left-aligned messages */
+            color: #e0e0e0;  /*Ensure text color for left-aligned messages */
         }
 
     .message-container.align-right {
         margin-right: auto;
+        color: #1a1a1a;
         /* Add any additional styles for right alignment */
     }
 
@@ -30,7 +31,7 @@
     white-space: normal;
     max-width: 100%;
     box-sizing: border-box;
-    background-color: #3e3e3e; /* Darker background for messages */
+    background-color: #0f0f0f; /* Dark blue background for messages */
 }
 
 .time-stamp {
@@ -81,4 +82,8 @@ pre {
     white-space: pre-wrap; /* Allow code to wrap */
     word-wrap: normal; /* Reset word-wrap for pre elements */
     max-width: 100%; /* Ensure pre elements don't exceed the container width */
+}
+
+.message-container.align-right .author {
+    color: #e0e0e0;  /* Ensure text color for left-aligned author remains light */
 }

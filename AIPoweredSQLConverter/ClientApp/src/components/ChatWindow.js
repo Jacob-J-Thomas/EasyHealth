@@ -2,12 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import './ChatWindow.css';
 import { Message } from './Message';
 
-function ChatWindow({ toggleSplit, isSmallViewport, messages, sendMessage }) {
+function ChatWindow({ messages, sendMessage, clearMessages }) {
     const [inputMessage, setInputMessage] = useState('');
     const chatEndRef = useRef(null);
 
     useEffect(() => {
-        //chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
     const handleSendMessage = () => {
@@ -21,10 +21,10 @@ function ChatWindow({ toggleSplit, isSmallViewport, messages, sendMessage }) {
                 {messages.map((msg, index) => (
                     <Message
                         key={index}
-                        author={msg.user}
-                        message={msg.message}
+                        author={msg.role}
+                        content={msg.content}
                         timestamp={msg.timestamp}
-                        alignRight={msg.user === "Assistant"}
+                        alignRight={msg.role === "Assistant"}
                     />
                 ))}
                 <div ref={chatEndRef} />
@@ -41,6 +41,7 @@ function ChatWindow({ toggleSplit, isSmallViewport, messages, sendMessage }) {
                     />
                 </div>
                 <button className="toolbar-button" onClick={handleSendMessage}>Convert</button>
+                <button className="toolbar-button" onClick={clearMessages}>Reset</button>
             </div>
         </div>
     );

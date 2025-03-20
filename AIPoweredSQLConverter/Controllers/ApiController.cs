@@ -1,10 +1,13 @@
 ﻿using AIPoweredSQLConverter.API;
 using AIPoweredSQLConverter.Business;
+using AIPoweredSQLConverter.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIPoweredSQLConverter.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class ApiController : ControllerBase
     {
@@ -35,6 +38,7 @@ namespace AIPoweredSQLConverter.Controllers
                 //};
 
                 //return Ok(clientSafeResult);
+                return Ok("Pretend API Key");
             }
             catch (Exception)
             {
@@ -42,7 +46,24 @@ namespace AIPoweredSQLConverter.Controllers
             }
         }
 
-        [HttpPost("/post/sqlData")]
+        [HttpGet("get/sqlData/{username}")]
+        public IActionResult GetSQLData([FromRoute] string username)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
+                var response = _promptFlowLogic.GetSQLData(username);
+                if (!string.IsNullOrEmpty(response)) return Ok(response);
+                return NotFound("No data found.");
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+            }
+        }
+
+
+        [HttpPost("post/sqlData")]
         public async Task<IActionResult> SaveSQLData([FromBody] FrontEndRequest requestBody)
         {
             try
@@ -51,7 +72,7 @@ namespace AIPoweredSQLConverter.Controllers
                 if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
                 if (string.IsNullOrEmpty(requestBody.SqlData)) return BadRequest("The SQL data is required.");
 
-                var success = await _promptFlowLogic.UpsertUserSQLProfile(requestBody);
+                var success = await _promptFlowLogic.UpsertUserData(requestBody);
                 if (success) return NoContent();
                 return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when saving the SQL data");
             }
@@ -61,7 +82,7 @@ namespace AIPoweredSQLConverter.Controllers
             }
         }
 
-        [HttpPost("/post/sqlHelp")]
+        [HttpPost("post/sqlHelp")]
         public async Task<IActionResult> RequestSQLDataHelp([FromBody] FrontEndRequest requestBody)
         {
             try
@@ -81,15 +102,14 @@ namespace AIPoweredSQLConverter.Controllers
             }
         }
 
-        [HttpPost("/post/convertQuery")]
+        [HttpPost("post/convertQuery")]
         public async Task<IActionResult> ConvertQueryToSQL([FromBody] FrontEndRequest requestBody)
         {
             try
             {
                 if (requestBody == null) return BadRequest("The request body is malformed.");
                 if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
-                if (string.IsNullOrEmpty(requestBody.Query)) return BadRequest("The query is required.");
-                if (requestBody.ConversationId == null) return BadRequest("The conversationId is required.");
+                if (!requestBody.Messages.Any()) return BadRequest("A message is required.");
 
                 var response = await _promptFlowLogic.ConvertQueryToSQL(requestBody);
                 if (!string.IsNullOrEmpty(response)) return Ok(response);

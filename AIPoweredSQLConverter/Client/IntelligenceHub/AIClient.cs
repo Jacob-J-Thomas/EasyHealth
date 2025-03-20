@@ -3896,7 +3896,7 @@ namespace AIPoweredSQLConverter.Client.IntelligenceHub
         [Newtonsoft.Json.JsonProperty("base64Image", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Base64Image { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("timeStamp", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("timestamp", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset TimeStamp { get; set; }
 
     }

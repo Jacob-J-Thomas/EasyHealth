@@ -1,5 +1,8 @@
 {
   "domain": "dev-64itzp4npb4uo8uv.us.auth0.com",
   "clientId": "7Gc1JUtnTnL0W5gnAEb7dPDf2Cf8Id4p",
-  "redirectUri": "http://localhost:7228/callback"
+  "audience": "https://localhost:7228",
+  "scope": "openid profile email user:all",
+  "ApiUri": "https://localhost:7228",
+  "redirectUri": "https://localhost:44483"
 }
