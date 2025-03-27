@@ -9,11 +9,15 @@ import ApiClient from '../api/ApiClient';
 import { NavMenu } from './NavMenu';
 import './WindowWrapper.css';
 import authConfig from '../auth_config.json';
+import { loadStripe } from '@stripe/stripe-js';
 
+// Initialize Stripe with your publishable key
+const stripePromise = loadStripe(authConfig.stripePublishableKey);
+const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at applied.ai.help@gmail.com.";
 const InnapropriateRequestErrorMessage = "Your last message was flagged as unrelated to SQL. Please check your input.";
 
 const WindowWrapper = () => {
-    const { isAuthenticated, getAccessTokenSilently, user } = useAuth0();
+    const { isAuthenticated, getAccessTokenSilently, user, logout } = useAuth0();
     const [state, setState] = useState({
         tableDefinitions: '',
         size: window.innerWidth < 1200 ? '50%' : '50%',
@@ -64,7 +68,7 @@ const WindowWrapper = () => {
                 }
 
                 try {
-                    const sqlData = await apiClient.getSQLData(user.email);
+                    const sqlData = await apiClient.getSQLData(user.sub);
                     setState((prevState) => ({
                         ...prevState,
                         tableDefinitions: sqlData,
@@ -77,13 +81,28 @@ const WindowWrapper = () => {
         initialize();
     }, [isAuthenticated, getAccessTokenSilently]);
 
+    useEffect(() => {
+        const handleStripeCheckoutClick = (event) => {
+            if (event.target && event.target.id === 'stripe-checkout-link') {
+                event.preventDefault();
+                apiClient.redirectToStripeCheckout(user.sub);
+            }
+        };
+
+        document.addEventListener('click', handleStripeCheckoutClick);
+
+        return () => {
+            document.removeEventListener('click', handleStripeCheckoutClick);
+        };
+    }, [apiClient]);
+
     const requestSQLConversion = async (inputMessage) => {
-        if (!user || !user.email) {
-            console.error('User is not authenticated or username is missing');
+        if (!user || !user.sub) {
+            console.error('User is not authenticated or sub ID is missing');
             return;
         }
 
-        const username = user.email;
+        const userId = user.sub;
         const newMessage = {
             role: 'User',
             content: inputMessage,
@@ -96,16 +115,32 @@ const WindowWrapper = () => {
         }));
 
         try {
-            const response = await apiClient.requestSQLConversion(username, updatedMessages, state.tableDefinitions);
-            if (response) {
+            if (state.tableDefinitions === null
+                || state.tableDefinitions === ""
+                || state.tableDefinitions === "null"
+                || state.tableDefinitions === "Enter SQL table Schema(s) here to help the model with context.") {
                 const responseMessage = {
                     role: 'Assistant',
-                    content: response,
+                    content: "Please be sure to set valid data in the SQL schema input to the left.",
                 };
                 setState((prevState) => ({
                     ...prevState,
                     messages: [...prevState.messages, responseMessage],
                 }));
+            }
+            else {
+                const response = await apiClient.requestSQLConversion(userId, updatedMessages, state.tableDefinitions);
+
+                if (response) {
+                    const responseMessage = {
+                        role: 'Assistant',
+                        content: response,
+                    };
+                    setState((prevState) => ({
+                        ...prevState,
+                        messages: [...prevState.messages, responseMessage],
+                    }));
+                }
             }
         } catch (error) {
             console.error('Error during SQL conversion request:', error.message);
@@ -113,19 +148,20 @@ const WindowWrapper = () => {
     };
 
     const handleAssistantSend = async (assistantInput) => {
-        if (!user || !user.email) {
-            console.error('User is not authenticated or email is missing');
+        if (!user || !user.sub) {
+            console.error('User is not authenticated or sub ID is missing');
             return;
         }
 
-        const username = user.email;
+        const userId = user.sub;
 
         try {
-            const response = await apiClient.requestSQLDataHelp(username, assistantInput, state.tableDefinitions);
+            const response = await apiClient.requestSQLDataHelp(userId, assistantInput, state.tableDefinitions);
+
             if (response.inappropriate) {
                 const errorMessage = {
                     role: 'Assistant',
-                    content: InnapropriateRequestErrorMessage
+                    content: InnapropriateRequestErrorMessage,
                 };
                 setState((prevState) => ({
                     ...prevState,
@@ -143,15 +179,15 @@ const WindowWrapper = () => {
     };
 
     const handleSave = async (tableDefinitions) => {
-        if (!user || !user.email) {
-            console.error('User is not authenticated or email is missing');
+        if (!user || !user.sub) {
+            console.error('User is not authenticated or sub ID is missing');
             return;
         }
 
-        const username = user.email;
+        const userId = user.sub;
 
         try {
-            await apiClient.saveSQLData(username, tableDefinitions);
+            await apiClient.saveSQLData(userId, tableDefinitions);
         } catch (error) {
             console.error('Error saving SQL data:', error.message);
         }

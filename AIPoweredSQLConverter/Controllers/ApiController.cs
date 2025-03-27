@@ -1,104 +1,67 @@
 ﻿using AIPoweredSQLConverter.API;
 using AIPoweredSQLConverter.Business;
 using AIPoweredSQLConverter.Common;
-using Microsoft.AspNetCore.Authorization;
+using AIPoweredSQLConverter.Host.Config;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Stripe;
+using Stripe.Checkout;
+using System.Net;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AIPoweredSQLConverter.Controllers
 {
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "ApiKeyPolicy")]
     [Route("[controller]")]
     public class ApiController : ControllerBase
     {
         private readonly IAuthLogic _authLogic;
-        private readonly IPromptFlowLogic _promptFlowLogic;
+        private readonly IPublicApiLogic _apiLogic;
 
-        public ApiController(IAuthLogic authLogic, IPromptFlowLogic promptLogic)
+        // Default error message for 429 responses
+        private const string _requestLimitExceededMessage = "You have reached the maximum number of requests allowed per day.";
+
+        public ApiController(IAuthLogic authLogic, IPublicApiLogic publicApiLogic, StripeSettings settings)
         {
             _authLogic = authLogic;
-            _promptFlowLogic = promptLogic;
+            _apiLogic = publicApiLogic;
         }
 
-        [HttpGet("get/newAPIKey/{username}")]
-        public async Task<IActionResult> GetNewAPIKey([FromRoute] string username)
+        [HttpGet("get/sqlData")]
+        public async Task<IActionResult> GetSQLData()
         {
             try
             {
-                if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
-
-                //var result = await _authLogic.RetrieveAuthToken();
-                //if (result?.AccessToken == null) return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
-
-                //// scrub unnescessary data
-                //var clientSafeResult = new AuthTokenResponse()
-                //{
-                //    AccessToken = result.AccessToken,
-                //    ExpiresIn = result.ExpiresIn,
-                //};
-
-                //return Ok(clientSafeResult);
-                return Ok("Pretend API Key");
+                if (!Request.Headers.TryGetValue("x-api-key", out var apiKey)) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "The API key is required." });
+                var response = await _apiLogic.GetSQLData(apiKey);
+                if (response.Success) return Ok(new PublicApiResponse { Success = true, Data = response.Data });
+                return StatusCode((int)response.StatusCode, new PublicApiResponse { Success = false, ErrorMesssage = response.Message });
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
+                return StatusCode(StatusCodes.Status500InternalServerError, new PublicApiResponse { Success = false, ErrorMesssage = "Something went wrong" });
             }
         }
-
-        [HttpGet("get/sqlData/{username}")]
-        public IActionResult GetSQLData([FromRoute] string username)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
-                var response = _promptFlowLogic.GetSQLData(username);
-                if (!string.IsNullOrEmpty(response)) return Ok(response);
-                return NotFound("No data found.");
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
-            }
-        }
-
 
         [HttpPost("post/sqlData")]
         public async Task<IActionResult> SaveSQLData([FromBody] FrontEndRequest requestBody)
         {
             try
             {
-                if (requestBody == null) return BadRequest("The request body is malformed.");
-                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
-                if (string.IsNullOrEmpty(requestBody.SqlData)) return BadRequest("The SQL data is required.");
+                if (requestBody == null) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "The request body is malformed." });
+                if (!Request.Headers.TryGetValue("x-api-key", out var apiKey)) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "The API key is required." });
 
-                var success = await _promptFlowLogic.UpsertUserData(requestBody);
-                if (success) return NoContent();
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when saving the SQL data");
+                var response = await _apiLogic.UpsertUserSQLData(requestBody, apiKey);
+
+                if (response.Success) return NoContent();
+                else return StatusCode((int)response.StatusCode, new PublicApiResponse { Success = false, ErrorMesssage = response.Message });
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
-            }
-        }
-
-        [HttpPost("post/sqlHelp")]
-        public async Task<IActionResult> RequestSQLDataHelp([FromBody] FrontEndRequest requestBody)
-        {
-            try
-            {
-                if (requestBody == null) return BadRequest("The request body is malformed.");
-                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
-                if (string.IsNullOrEmpty(requestBody.SqlData)) return BadRequest("The SQL data is required.");
-                if (string.IsNullOrEmpty(requestBody.Query)) return BadRequest("The query is required.");
-
-                var response = await _promptFlowLogic.GetSQLDataHelp(requestBody);
-                if (!string.IsNullOrEmpty(response)) return Ok(response);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when constructing the SQL definition.");
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+                return StatusCode(StatusCodes.Status500InternalServerError, new PublicApiResponse { Success = false, ErrorMesssage = "Something went wrong when authenticating" });
             }
         }
 
@@ -107,17 +70,25 @@ namespace AIPoweredSQLConverter.Controllers
         {
             try
             {
-                if (requestBody == null) return BadRequest("The request body is malformed.");
-                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
-                if (!requestBody.Messages.Any()) return BadRequest("A message is required.");
+                if (requestBody == null) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "The request body is malformed." });
+                if (!Request.Headers.TryGetValue("x-api-key", out var apiKey)) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "The API key is required." });
 
-                var response = await _promptFlowLogic.ConvertQueryToSQL(requestBody);
-                if (!string.IsNullOrEmpty(response)) return Ok(response);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when converting the string to SQL.");
+                if (!requestBody.Messages.Any(x => x.Role == Client.IntelligenceHub.Role.User)) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "A user query is required." });
+
+                var response = await _apiLogic.ConvertQueryToSQL(requestBody, apiKey);
+
+                if (response.Success)
+                {
+                    var remainingFreeQuota = await _apiLogic.GetRemainingFreeRequests(apiKey);
+                    return Ok(new PublicApiResponse { Success = true, Data = response.Data, RemainingFreeRequests = remainingFreeQuota.Data - 1 }); // minus 1 to account for the current request
+                }
+                else if (response.StatusCode == HttpStatusCode.TooManyRequests) return StatusCode(429, new PublicApiResponse { Success = false, ErrorMesssage = _requestLimitExceededMessage });
+                else if (response.Message.Contains("concurrency")) return Conflict(new PublicApiResponse { Success = false, ErrorMesssage = "A concurrency error occurred. Please retry the request." });
+                else return StatusCode((int)response.StatusCode, new PublicApiResponse { Success = false, ErrorMesssage = response.Message });
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+                return StatusCode(StatusCodes.Status500InternalServerError, new PublicApiResponse { Success = false, ErrorMesssage = "Something went wrong when authenticating" });
             }
         }
     }

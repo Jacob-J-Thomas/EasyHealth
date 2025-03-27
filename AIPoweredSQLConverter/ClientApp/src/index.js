@@ -15,6 +15,11 @@ const onRedirectCallback = (appState) => {
         document.title,
         appState?.returnTo || window.location.pathname
     );
+
+    // Clear messages from local storage on sign out
+    if (!appState || appState.returnTo === '/logout') {
+        localStorage.removeItem('messages');
+    }
 };
 
 const rootElement = document.getElementById('root');
@@ -62,3 +67,4 @@ reportWebVitals(metric => {
     //appInsights.trackMetric({ name: metric.name, average: metric.value });
     console.log("App Insight Metric Written:\n", { name: metric.name, average: metric.value });
 });
+

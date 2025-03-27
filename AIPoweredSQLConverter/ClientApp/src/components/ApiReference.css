@@ -32,9 +32,9 @@
     margin-top: 1.5em;
 }
 
-.api-endpoint pre {
-    background-color: #000000;
-}
+    .api-endpoint pre {
+        background-color: #000000;
+    }
 
     .api-endpoint code {
         display: block;

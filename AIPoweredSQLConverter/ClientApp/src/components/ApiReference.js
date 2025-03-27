@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import FooterSection from './FooterSection';
 import { NavMenu } from './NavMenu';
+import GenerateApiKey from './GenerateApiKey';
 import './ApiReference.css';
 
 function ApiReference() {
@@ -10,7 +11,9 @@ function ApiReference() {
             <div className="api-reference-content">
                 <h1>API Reference</h1>
                 <p>Welcome to the API reference for NLSequel. Below you will find details about the available endpoints and how to use them.</p>
-
+                <p>Below you can generate an API key to access these endpoints. Keys remain valid for 6 months following their creation.
+                    NOTE: Generating this key will invalidate any previous key you've created.</p>
+                <GenerateApiKey />
                 <div className="api-endpoint">
                     <h2>Convert SQL</h2>
                     <p>Endpoint: <code>POST /api/convert</code></p>

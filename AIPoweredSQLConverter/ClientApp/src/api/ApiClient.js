@@ -1,10 +1,15 @@
 ﻿import axios from 'axios';
 import authConfig from '../auth_config.json';
+import { loadStripe } from '@stripe/stripe-js';
 
-const InnapropriateRequestErrorMessage = "Your last message was flagged as unrelated to SQL. Please check your input."
-const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at applied.ai.help@gmail.com."
-const NullTableErrorMessage = "Please ensure you've attached sql table definition(s) to the left.";
+// Initialize Stripe with your publishable key
+const stripePromise = loadStripe(authConfig.stripePublishableKey);
 
+const InappropriateRequestErrorMessage = "Your last message was flagged as unrelated to SQL. Please check your input.";
+const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at applied.ai.help@gmail.com.";
+const NullTableErrorMessage = "Please ensure you've attached SQL table schema(s) to the left.";
+const ConcurrencyErrorMessage = "A concurrency error occurred. Retrying your request.";
+const TooManyRequestsMessage = "Sorry, but it looks like your usage quota has been depleted. To sign up for pay as you go billing, you can do so here: "
 class ApiClient {
     constructor(baseUrl, getAccessTokenSilently) {
         this.baseUrl = baseUrl;
@@ -29,40 +34,109 @@ class ApiClient {
                     }
                 } catch (error) {
                     console.error('Error fetching access token:', error);
-                    return "Please ensure you've attached a Table Definition. If you continue to receive this error, please request support at applied.ai.help@gmail.com.";
+                    throw new Error("Authorization error");
                 }
                 return config;
             },
             (error) => Promise.reject(error)
         );
+
+        // Bind methods
+        this.redirectToStripeCheckout = this.redirectToStripeCheckout.bind(this);
+    }
+
+    // Helper method to retry a request
+    async retryRequest(fn, retries = 3) {
+        for (let attempt = 0; attempt < retries; attempt++) {
+            try {
+                return await fn();
+            } catch (error) {
+                if (error.response && error.response.status === 409) {
+                    // Concurrency error, retry
+                    console.warn(`Concurrency error detected. Retrying attempt ${attempt + 1} of ${retries}.`);
+                    // Optionally introduce a small delay before retrying
+                    await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1))); // Exponential backoff
+                } else {
+                    // Other error, do not retry
+                    throw new Error("Something went wrong.");;
+                }
+            }
+        }
+        throw new Error("Maximum retries reached after concurrency errors.");
+    }
+
+    async createPortalSession(sub) {
+        try {
+            const response = await this.client.post(`/webhook/create-portal-session/${sub}`);
+            if (response.status === 200) {
+                if (response.data) return response.data;
+            } else {
+                console.error('Failed to create portal session:', response.statusText);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error during creating portal session:', error.message);
+            return null;
+        }
+    }
+
+    async createCheckoutSession(sub) {
+        try {
+            const response = await this.client.post(`/webhook/create-checkout-session/${sub}`);
+            if (response.status === 200) {
+                return response.data.sessionId;
+            } else {
+                console.error('Failed to create checkout session:', response.statusText);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error during creating checkout session:', error.message);
+            return null;
+        }
+    }
+
+    async redirectToStripeCheckout(sub, sessionId = null) {
+        const stripe = await stripePromise;
+
+        if (!sessionId) sessionId = await this.createCheckoutSession(sub);
+
+        if (sessionId) {
+            const { error } = await stripe.redirectToCheckout({ sessionId });
+            if (error) {
+                console.error('Stripe checkout redirection error:', error);
+            }
+        } else {
+            console.error('Failed to create Stripe checkout session.');
+        }
+    }
+
+    appendCheckoutLink(message) {
+        return `${message} Please <a href="#" id="stripe-checkout-link">click here</a> to proceed to the Stripe Checkout.`;
     }
 
     async getNewAPIKey(username) {
         try {
-            const response = await this.client.get(`/api/get/newAPIKey/${username}`);
+            const response = await this.client.get(`/promptflow/get/newAPIKey/${username}`);
             if (response.status === 200) {
                 return response.data;
             } else {
-                console.error('Failed to get new API key:', response.statusText);
                 return DefaultErrorMessage;
             }
         } catch (error) {
-            console.error('Error during getting new API key:', error.message);
             return DefaultErrorMessage;
         }
     }
 
     async getSQLData(username) {
         try {
-            const response = await this.client.get('/api/get/sqlData/' + username);
+            const response = await this.client.get('/promptflow/get/sqlData/' + username);
             if (response.status === 200) {
                 return response.data;
             } else {
-                console.error('Failed to save SQL data:', response.statusText);
                 return DefaultErrorMessage;
             }
         } catch (error) {
-            console.error('Error during saving SQL data:', error.message);
+            if (error.status === 404) return "Enter SQL table Schema(s) here to help the model with context.";
             return DefaultErrorMessage;
         }
     }
@@ -74,15 +148,13 @@ class ApiClient {
                 SqlData: sqlDefinitionsString,
             };
 
-            const response = await this.client.post('/api/post/sqlData', body);
+            const response = await this.client.post('/promptflow/post/sqlData', body);
             if (response.status === 204) {
                 return response.data;
             } else {
-                console.error('Failed to save SQL data:', response.statusText);
                 return DefaultErrorMessage;
             }
         } catch (error) {
-            console.error('Error during saving SQL data:', error.message);
             return DefaultErrorMessage;
         }
     }
@@ -95,15 +167,20 @@ class ApiClient {
                 SqlData: tableDefinitions
             };
 
-            const response = await this.client.post('/api/post/sqlHelp', body);
-            if (response.status === 200) {
-                return response.data;
-            } else {
-                console.error('Failed to request SQL data help:', response.statusText);
-                return DefaultErrorMessage;
-            }
+            const makeRequest = async () => {
+                const response = await this.client.post('/promptflow/post/sqlHelp', body);
+                if (response.status === 200) {
+                    return response.data;
+                } else {
+                    return DefaultErrorMessage;
+                }
+            };
+
+            return await this.retryRequest(makeRequest);
         } catch (error) {
-            console.error('Error during requesting SQL data help:', error.message);
+            if (error.response && error.response.status === 429) {
+                return this.appendCheckoutLink(error.response.data || DefaultErrorMessage);
+            }
             return DefaultErrorMessage;
         }
     }
@@ -118,18 +195,25 @@ class ApiClient {
                 SqlData: tableDefinitions
             };
 
-            const response = await this.client.post('/api/post/convertQuery', body);
-            if (response.status === 200) {
-                return response.data;
-            } else {
-                console.error('Failed to convert query to SQL:', response.statusText);
-                return DefaultErrorMessage;
-            }
+            const makeRequest = async () => {
+                try {
+                    const response = await this.client.post('/promptflow/post/convertQuery', body);
+                    return response.data; // If 200, we get here
+                } catch (error) {
+                    if (error.response && error.response.status === 429) {
+                        return this.appendCheckoutLink(TooManyRequestsMessage);
+                    }
+                    return DefaultErrorMessage;
+                }
+            };
+
+            return await this.retryRequest(makeRequest);
         } catch (error) {
-            console.error('Error during SQL conversion request:', error.message);
             return DefaultErrorMessage;
         }
     }
 }
 
 export default ApiClient;
+
+

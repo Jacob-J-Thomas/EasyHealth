@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import './ChatWindow.css';
 import { Message } from './Message';
 
-function ChatWindow({ messages, sendMessage, clearMessages }) {
+function ChatWindow({ messages, sendMessage, clearMessages, toggleSplit, isSmallViewport }) {
     const [inputMessage, setInputMessage] = useState('');
     const chatEndRef = useRef(null);
 

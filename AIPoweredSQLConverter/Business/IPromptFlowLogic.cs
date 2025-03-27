@@ -1,12 +1,18 @@
 ﻿using AIPoweredSQLConverter.API;
+using AIPoweredSQLConverter.DAL.Models;
 
 namespace AIPoweredSQLConverter.Business
 {
     public interface IPromptFlowLogic
     {
-        Task<bool> UpsertUserData(FrontEndRequest request);
-        Task<string?> GetSQLDataHelp(FrontEndRequest request);
-        string? GetSQLData(string username);
-        Task<string?> ConvertQueryToSQL(FrontEndRequest request);
+        Task<BackendResponse<UserData?>> GetUser(string username);
+        Task<BackendResponse<bool>> MarkUserAsPaying(string username, string customerId);
+        Task<BackendResponse<bool>> MarkUserAsNonPaying(string username);
+        Task<BackendResponse<bool>> UpsertUserSQLData(FrontEndRequest request);
+        Task<BackendResponse<string?>> GetSQLDataHelp(FrontEndRequest request);
+        BackendResponse<string?> GetSQLData(string username);
+        Task<BackendResponse<string?>> ConvertQueryToSQL(FrontEndRequest request);
+        Task<BackendResponse<string>> GenerateAndStoreApiKey(string username);
     }
 }
+

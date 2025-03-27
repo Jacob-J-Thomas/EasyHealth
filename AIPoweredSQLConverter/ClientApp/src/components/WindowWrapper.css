@@ -55,3 +55,55 @@
         height: 140vh;
     }
 }
+
+/* Modal styles */
+.ReactModal__Overlay {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ReactModal__Content {
+    position: relative;
+    background: #2e2e2e;
+    color: #e0e0e0;
+    border-radius: 4px;
+    padding: 2em;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    outline: none;
+}
+
+    .ReactModal__Content h2 {
+        margin-top: 0;
+        font-size: 1.5em;
+    }
+
+    .ReactModal__Content p {
+        margin: 1em 0;
+    }
+
+    .ReactModal__Content button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5em 1em;
+        margin-right: 1em;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+        .ReactModal__Content button:hover {
+            background-color: #0056b3;
+        }
+
+        .ReactModal__Content button:last-child {
+            background-color: #6c757d;
+        }
+
+            .ReactModal__Content button:last-child:hover {
+                background-color: #5a6268;
+            }

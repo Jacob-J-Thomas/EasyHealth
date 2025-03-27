@@ -12,7 +12,7 @@ using System.Text.Json.Serialization;
 using System.Security.Claims;
 using AIPoweredSQLConverter.Host.Auth;
 using Microsoft.AspNetCore.Authorization;
-using AIPoweredSQLConverter.DAL; // Required for JsonStringEnumConverter
+using AIPoweredSQLConverter.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -28,63 +28,89 @@ namespace AIPoweredSQLConverter.Host
             var connectionStrings = builder.Configuration.GetRequiredSection(nameof(ConnectionStrings)).Get<ConnectionStrings>();
             var authSettings = builder.Configuration.GetRequiredSection(nameof(AuthSettings)).Get<AuthSettings>();
             var intelligenceHubSettings = builder.Configuration.GetRequiredSection(nameof(IntelligenceHubAuthSettings)).Get<IntelligenceHubAuthSettings>();
+            var stripeSettings = builder.Configuration.GetRequiredSection(nameof(StripeSettings)).Get<StripeSettings>();
 
-            // Ensure all API app settings exist
+            // Validate required settings.
             if (string.IsNullOrEmpty(connectionStrings?.DbConnectionString) || string.IsNullOrEmpty(connectionStrings?.AppInsightsConnectionString))
             {
                 throw new ArgumentException("Connection strings cannot be null or empty.");
             }
-
             if (string.IsNullOrEmpty(authSettings?.BasicAuthUsername) || string.IsNullOrEmpty(authSettings?.BasicAuthPassword) ||
                 string.IsNullOrEmpty(authSettings?.Audience) || string.IsNullOrEmpty(authSettings?.Domain))
             {
                 throw new ArgumentException("Auth settings cannot be null or empty.");
             }
-
-            if (string.IsNullOrEmpty(intelligenceHubSettings?.Endpoint) || string.IsNullOrEmpty(intelligenceHubSettings?.AdminClientId) || 
-                string.IsNullOrEmpty(intelligenceHubSettings?.AdminClientSecret) || string.IsNullOrEmpty(intelligenceHubSettings?.DefaultClientId) || 
+            if (string.IsNullOrEmpty(intelligenceHubSettings?.Endpoint) || string.IsNullOrEmpty(intelligenceHubSettings?.AdminClientId) ||
+                string.IsNullOrEmpty(intelligenceHubSettings?.AdminClientSecret) || string.IsNullOrEmpty(intelligenceHubSettings?.DefaultClientId) ||
                 string.IsNullOrEmpty(intelligenceHubSettings?.DefaultClientSecret) || string.IsNullOrEmpty(intelligenceHubSettings?.Audience))
             {
                 throw new ArgumentException("Intelligence Hub Auth settings cannot be null or empty.");
             }
+            if (string.IsNullOrEmpty(stripeSettings.SecretKey) || string.IsNullOrEmpty(stripeSettings.PublishableKey)
+                || string.IsNullOrEmpty(stripeSettings.SignupWebhookKey) || string.IsNullOrEmpty(stripeSettings.CancelationWebhookKey)
+                || string.IsNullOrEmpty(stripeSettings.Domain) || string.IsNullOrEmpty(stripeSettings.MeterName)
+                || string.IsNullOrEmpty(stripeSettings.MeterPriceKey) || string.IsNullOrEmpty(stripeSettings.ApiEncryptionKey))
+            {
+                throw new ArgumentException("Stripe Settings cannot be null or empty.");
+            }
 
+            // Register configuration objects.
             builder.Services.AddSingleton(connectionStrings);
             builder.Services.AddSingleton(authSettings);
             builder.Services.AddSingleton(intelligenceHubSettings);
+            builder.Services.AddSingleton(stripeSettings);
 
             builder.Services.AddHttpClient();
-
             builder.Services.AddSingleton<AIAuthClient>();
             builder.Services.AddSingleton<IAIAuthClient, AIAuthClient>();
             builder.Services.AddSingleton<IAIClientWrapper, AIClientWrapper>();
-
             builder.Services.AddScoped<IPromptFlowLogic, PromptFlowLogic>();
             builder.Services.AddScoped<IAuthLogic, AuthLogic>();
+            builder.Services.AddScoped<IPublicApiLogic, PublicApiLogic>();
 
             #region Authentication
-
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-            {
-                options.Authority = $"https://{authSettings.Domain}/";
-                options.Audience = authSettings.Audience;
-                options.TokenValidationParameters = new TokenValidationParameters { NameClaimType = ClaimTypes.NameIdentifier, };
-            });
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = $"https://{authSettings.Domain}/";
+                    options.Audience = authSettings.Audience;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        NameClaimType = ClaimTypes.NameIdentifier,
+                    };
+                });
 
             builder.Services.AddAuthorization(options =>
-              {
-                  options.AddPolicy("user:all", policy => policy.Requirements.Add(new HasScopeRequirement("user:all", $"https://{authSettings.Domain}/")));
-              });
+            {
+                options.AddPolicy("Auth0Policy", policy =>
+                {
+                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+                    policy.RequireAuthenticatedUser();
+                });
+
+                options.AddPolicy("ApiKeyPolicy", policy =>
+                {
+                    policy.RequireAssertion(context => context.User.Identity != null && context.User.Identity.AuthenticationType == "ApiKey");
+                });
+            });
 
             builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
             #endregion
 
-            // Add EF Core DbContext
+            // Register EF Core DbContext
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionStrings.DbConnectionString));
 
-            // Updated: Add controllers with JSON serialization settings that convert strings to enums
-            builder.Services.AddControllersWithViews().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+            // Add controllers with JSON options.
+            builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
-            // Register Swagger generator
+            // Register API key validator and HttpContextAccessor.
+            builder.Services.AddScoped<IApiKeyValidator, ApiKeyValidator>();
+            builder.Services.AddHttpContextAccessor();
+
+            // Register Swagger generator.
             builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "Conversational AI Website", Version = "v1" });
@@ -97,39 +123,55 @@ namespace AIPoweredSQLConverter.Host
                     In = ParameterLocation.Header,
                     Description = "Enter 'Bearer' followed by a space and the JWT token."
                 });
+
+                options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+                {
+                    Description = "API Key needed to access the endpoints. X-API-Key: {apiKey}",
+                    Type = SecuritySchemeType.ApiKey,
+                    Name = "X-API-Key",
+                    In = ParameterLocation.Header,
+                });
+
+                // Add both security schemes as requirements
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
                         Array.Empty<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKey" } },
+                        Array.Empty<string>()
                     }
                 });
             });
 
-            // Add Logging via Application Insights
-            builder.Services.AddApplicationInsightsTelemetry(options => { options.ConnectionString = connectionStrings?.AppInsightsConnectionString; });
-
+            // Add Application Insights logging.
+            builder.Services.AddApplicationInsightsTelemetry(options =>
+            {
+                options.ConnectionString = connectionStrings?.AppInsightsConnectionString;
+            });
             builder.Services.AddLogging(options =>
             {
                 options.AddApplicationInsights();
             });
 
-            // Program.cs
+            // CORS.
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigins", builder =>
                     builder
-                        .WithOrigins("https://localhost:44483", "https://localhost:7228", "https://dev-64itzp4npb4uo8uv.us.auth0.com/*") // Front-end URL
+                        .WithOrigins("https://localhost:44483", "https://localhost:7228", "https://dev-64itzp4npb4uo8uv.us.auth0.com/*")
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
 
             var app = builder.Build();
 
-            // Enable CORS
+            // Enable CORS.
             app.UseCors("AllowSpecificOrigins");
 
-            // Configure the HTTP request pipeline.
+            // Production settings.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseHsts();
@@ -139,23 +181,27 @@ namespace AIPoweredSQLConverter.Host
             app.UseStaticFiles();
             app.UseRouting();
 
+            // Add API key middleware before authentication and authorization.
+            app.UseMiddleware<ApiKeyMiddleware>();
+
+            // Add authentication and authorization.
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Enable Swagger UI
+            // Swagger.
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1");
-                c.RoutePrefix = "swagger"; // Set Swagger UI path
+                c.RoutePrefix = "swagger";
             });
 
-            // Map controllers and default route
+            // Map controllers and default route.
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller}/{action=Index}/{id?}");
 
-            // Map fallback route to serve index.html
+            // Fallback route.
             app.MapFallbackToFile("index.html");
 
             app.Run();

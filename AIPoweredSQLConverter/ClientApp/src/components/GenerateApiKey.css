@@ -1,0 +1,50 @@
+﻿.generate-api-key-container {
+    display: flex;
+    align-items: flex-end; /* Align items to the bottom */
+    gap: 1rem; /* Add space between the button and the paragraph */
+}
+
+.generate-api-key-button {
+    position: relative;
+    display: inline-block;
+    padding: 0.75rem 1rem; /* Adjust padding for consistent height */
+    color: #ffffff; /* Text remains black */
+    font-weight: bold;
+    font-size: .8rem;
+    border: 2px solid #ffffff; /* Initial border color is black */
+    border-radius: 0.5rem; /* Rounded border */
+    background-color: transparent;
+    cursor: pointer;
+    overflow: hidden; /* Hide the pseudo-element overflow */
+    transition: border-color 0.9s ease, transform 0.9s ease;
+    display: flex;
+    align-items: center; /* Center text vertically */
+}
+
+    .generate-api-key-button:hover::before {
+        transform: scaleX(1); /* Expand from center outwards */
+    }
+
+    .generate-api-key-button:hover {
+        border-color: #007bff; /* Border animates from black to blue on hover */
+    }
+
+    .generate-api-key-button:active {
+        transform: scale(0.9); /* Slightly shrink the button on click */
+        transition: transform 0.1s ease; /* Quick transition for click effect */
+    }
+
+.api-key-text, .error {
+    margin: 0; /* Remove default margin */
+}
+
+.api-key-text {
+    display: block;
+    background-color: #000000;
+    color: #ffffff;
+    padding: 0.7rem 1rem; /* Adjust padding for consistent height */
+    border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    align-items: center; /* Center text vertically */
+}

@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
 import './AuthButton.css';
+import authConfig from '../auth_config.json';
 
 const AuthButton = () => {
     const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
@@ -20,8 +21,8 @@ const AuthButton = () => {
             onClick={() =>
                 loginWithRedirect({
                     authorizationParams: {
-                        audience: 'https://localhost:7228', // Your API identifier
-                        scope: 'email user:all',                   // The scope your API requires
+                        audience: authConfig.ApiUri,
+                        scope: authConfig.scope, 
                     },
                 })
             }

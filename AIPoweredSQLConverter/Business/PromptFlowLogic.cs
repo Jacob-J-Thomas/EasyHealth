@@ -2,6 +2,11 @@
 using AIPoweredSQLConverter.Client.IntelligenceHub;
 using AIPoweredSQLConverter.DAL;
 using AIPoweredSQLConverter.DAL.Models;
+using AIPoweredSQLConverter.Host.Config;
+using Microsoft.EntityFrameworkCore;
+using Stripe;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AIPoweredSQLConverter.Business
 {
@@ -10,93 +15,340 @@ namespace AIPoweredSQLConverter.Business
         private readonly IAIClientWrapper _aiClient;
         private readonly AppDbContext _dbContext;
 
+        // Maximum number of requests allowed per day for non-paying users
+        private const int _maxRequestsPerDay = 20;
+
         private const string _sqlDataConstructionProfile = "NLSequelDataConstructionHelper";
         private const string _sqlConversionProfile = "NLSequelConverter";
 
-        public PromptFlowLogic(IAIClientWrapper aiClient, AppDbContext context)
+        private readonly string _encryptionKey;
+        private readonly string _meterName;
+        private readonly string _stripeKey;
+
+        public PromptFlowLogic(IAIClientWrapper aiClient, AppDbContext context, StripeSettings settings)
         {
             _aiClient = aiClient;
             _dbContext = context;
+
+            _encryptionKey = settings.ApiEncryptionKey;
+            _meterName = settings.MeterName;
+            _stripeKey = settings.SecretKey;
         }
 
-        public async Task<bool> UpsertUserData(FrontEndRequest request)
+        public async Task<BackendResponse<UserData?>> GetUser(string username)
         {
-            var existingUser = _dbContext.UserData.FirstOrDefault(user => user.Username == request.Username);
-
-            // Add or update existing
-            if (existingUser != null)
+            try
             {
-                existingUser.UserSQLData = request.SqlData;
-                _dbContext.UserData.Update(existingUser);
+                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null)
+                {
+                    return BackendResponse<UserData?>.CreateFailureResponse("User not found.", System.Net.HttpStatusCode.NotFound);
+                }
+                return BackendResponse<UserData?>.CreateSuccessResponse(user, "User profile retrieved successfully.");
             }
-            else
+            catch (Exception)
             {
-                var newUser = new UserData { Username = request.Username, UserSQLData = request.SqlData };
-                await _dbContext.UserData.AddAsync(newUser);
+                return BackendResponse<UserData?>.CreateFailureResponse($"Error retrieving user.");
             }
-
-            // Save changes and return whether at least one record was affected.
-            return await _dbContext.SaveChangesAsync() > 0;
         }
 
-        public string? GetSQLData(string username)
+        public async Task<BackendResponse<bool>> MarkUserAsPaying(string username, string customerId)
         {
-            var result = _dbContext.UserData.FirstOrDefault(user => user.Username == username);
-            return result?.UserSQLData;
-        }
-
-        public async Task<string?> GetSQLDataHelp(FrontEndRequest request)
-        {
-            // Retrieve the user's data using the primary key (Username).
-            var userData = _dbContext.UserData.FirstOrDefault(user => user.Username == request.Username);
-            if (userData == null) return null;
-
-            // Build the context string using the user's SQL data.
-            var completionContent = $"{request.Query}. For context, I provided my current table definitions below: \n\n{userData.UserSQLData}";
-
-            // Construct the completion request using the specified profile and message.
-            var completionRequest = new CompletionRequest
+            try
             {
-                ProfileOptions = new Profile { Name = _sqlDataConstructionProfile },
-                Messages = new List<Message> { new Message { Content = completionContent, Role = Role.User, TimeStamp = DateTime.UtcNow } }
-            };
-
-            var completionResponse = await _aiClient.ChatAsync(completionRequest);
-            return completionResponse.Messages?.LastOrDefault()?.Content;
+                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null) return BackendResponse<bool>.CreateFailureResponse("User not found.");
+                user.IsPayingCustomer = true;
+                user.StripeCustomerId = customerId;
+                _dbContext.UserData.Update(user);
+                await _dbContext.SaveChangesAsync();
+                return BackendResponse<bool>.CreateSuccessResponse(true, "User updated to paying status.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<bool>.CreateFailureResponse($"Error updating user.");
+            }
         }
 
-        public async Task<string?> ConvertQueryToSQL(FrontEndRequest request)
+        public async Task<BackendResponse<bool>> MarkUserAsNonPaying(string username)
         {
-            // Retrieve the user's data using the primary key (Username).
-            //var userData = _dbContext.UserData.FirstOrDefault(user => user.Username == request.Username);
-            //if (userData == null || string.IsNullOrWhiteSpace(userData.UserSQLData)) return null;
-
-            // Check if the SqlData is out of aligment and save if new
-            //if (request.SqlData != userData.UserSQLData)
-            //{
-            //    request.SqlData = userData.UserSQLData ?? request.SqlData;
-
-            //    var upsertResult = await UpsertUserData(request);
-            //    if (!upsertResult) return null;
-            //}
-
-            // Build the context string using the user's SQL data.
-            var completionContent = $"\n\nThe current time in UTC is {DateTime.UtcNow}. For context, I provided my current table definitions below:\n\n{request.SqlData}";
-
-            // Append completion content to the last message in Messages.
-            if (request.Messages.Any(x => x.Role == Role.User)) request.Messages.Last(x => x.Role == Role.User).Content += $"{completionContent}";
-            else return null;
-
-            // Construct the completion request using the conversion profile and provided messages.
-            var completionRequest = new CompletionRequest
+            try
             {
-                ProfileOptions = new Profile { Name = _sqlConversionProfile },
-                Messages = request.Messages
+                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null) return BackendResponse<bool>.CreateFailureResponse("User not found.");
+                user.IsPayingCustomer = false;
+                _dbContext.UserData.Update(user);
+                await _dbContext.SaveChangesAsync();
+                return BackendResponse<bool>.CreateSuccessResponse(true, "User updated to non-paying status.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<bool>.CreateFailureResponse($"Error updating user.");
+            }
+        }
+
+        public async Task<BackendResponse<bool>> UpsertUserSQLData(FrontEndRequest request)
+        {
+            try
+            {
+                var existingUser = _dbContext.UserData.FirstOrDefault(user => user.Username == request.Username);
+
+                // Add or update existing user data
+                if (existingUser != null)
+                {
+                    existingUser.UserSQLData = request.SqlData;
+                    _dbContext.UserData.Update(existingUser);
+                }
+                else
+                {
+                    var newUser = new UserData { Username = request.Username, UserSQLData = request.SqlData };
+                    await _dbContext.UserData.AddAsync(newUser);
+                }
+
+                // Save changes and return success response
+                var changes = await _dbContext.SaveChangesAsync();
+                if (changes > 0) return BackendResponse<bool>.CreateSuccessResponse(true, "User data updated successfully.");
+                else return BackendResponse<bool>.CreateFailureResponse("No changes were made to the database.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<bool>.CreateFailureResponse($"An error occurred when updating user data.");
+            }
+        }
+
+        public BackendResponse<string?> GetSQLData(string username)
+        {
+            try
+            {
+               var result = _dbContext.UserData.FirstOrDefault(user => user.Username == username);
+                if (result != null && !string.IsNullOrEmpty(result.UserSQLData)) return BackendResponse<string?>.CreateSuccessResponse(result.UserSQLData);
+                else return BackendResponse<string?>.CreateFailureResponse("No SQL data found for the given user.", System.Net.HttpStatusCode.NotFound);
+            }
+            catch (Exception)
+            {
+                return BackendResponse<string?>.CreateFailureResponse($"An error occurred when retrieving SQL data.");
+            }
+        }
+
+        public async Task<BackendResponse<string?>> GetSQLDataHelp(FrontEndRequest request)
+        {
+            try
+            {
+                using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                var userData = await _dbContext.UserData
+                    .Where(user => user.Username == request.Username)
+                    .FirstOrDefaultAsync();
+
+                if (userData == null)
+                {
+                    return BackendResponse<string?>.CreateFailureResponse("User data not found.");
+                }
+
+                var today = DateTime.UtcNow.Date;
+                if (userData.LastRequestDate != today)
+                {
+                    userData.RequestCount = 1;
+                    userData.LastRequestDate = today;
+                }
+                else
+                {
+                    userData.RequestCount++;
+                }
+
+                if (!userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
+                {
+                    return BackendResponse<string?>.CreateFailureResponse(
+                        "You have reached the maximum number of requests allowed per day.",
+                        System.Net.HttpStatusCode.TooManyRequests);
+                }
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                if (userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
+                {
+                    RecordUsageWithStripe(userData.StripeCustomerId, 1);
+                }
+
+                var completionContent = $"{request.Query}. For context, I provided my current table definitions below:\n\n{userData.UserSQLData}";
+
+                var completionRequest = new CompletionRequest
+                {
+                    ProfileOptions = new Profile { Name = _sqlDataConstructionProfile },
+                    Messages = new List<Message>
+                    {
+                        new Message
+                        {
+                            Content = completionContent,
+                            Role = Role.User,
+                            TimeStamp = DateTime.UtcNow
+                        }
+                    }
+                };
+
+                var completionResponse = await _aiClient.ChatAsync(completionRequest);
+                var responseContent = completionResponse.Messages?.LastOrDefault()?.Content;
+
+                if (!string.IsNullOrEmpty(responseContent))
+                {
+                    return BackendResponse<string?>.CreateSuccessResponse(responseContent);
+                }
+                else
+                {
+                    return BackendResponse<string?>.CreateFailureResponse("No response received from the AI client.");
+                }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BackendResponse<string?>.CreateFailureResponse("A concurrency error occurred. Please retry the request.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<string?>.CreateFailureResponse($"An error occurred.");
+            }
+        }
+
+        public async Task<BackendResponse<string?>> ConvertQueryToSQL(FrontEndRequest request)
+        {
+            try
+            {
+                using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                var userData = await _dbContext.UserData
+                    .Where(user => user.Username == request.Username)
+                    .FirstOrDefaultAsync();
+
+                if (userData == null)
+                {
+                    return BackendResponse<string?>.CreateFailureResponse("User data not found.");
+                }
+
+                var today = DateTime.UtcNow.Date;
+                if (userData.LastRequestDate != today)
+                {
+                    userData.RequestCount = 1;
+                    userData.LastRequestDate = today;
+                }
+                else
+                {
+                    userData.RequestCount++;
+                }
+
+                if (!userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
+                {
+                    return BackendResponse<string?>.CreateFailureResponse(
+                        "You have reached the maximum number of requests allowed per day.",
+                        System.Net.HttpStatusCode.TooManyRequests);
+                }
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                if (userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
+                {
+                    RecordUsageWithStripe(userData.StripeCustomerId, 1);
+                }
+
+                var completionContent = $"\n\nThe current time in UTC is {DateTime.UtcNow}. For context, I provided my current table definitions below:\n\n{userData.UserSQLData}";
+                if (request.Messages.Any(x => x.Role == Role.User))
+                {
+                    request.Messages.Last(x => x.Role == Role.User).Content += completionContent;
+                }
+                else
+                {
+                    return BackendResponse<string?>.CreateFailureResponse("No user message found in the conversation.");
+                }
+
+                var completionRequest = new CompletionRequest
+                {
+                    ProfileOptions = new Profile { Name = _sqlConversionProfile },
+                    Messages = request.Messages
+                };
+
+                var completionResponse = await _aiClient.ChatAsync(completionRequest);
+                var responseContent = completionResponse.Messages?.LastOrDefault()?.Content;
+
+                if (!string.IsNullOrEmpty(responseContent))
+                {
+                    return BackendResponse<string?>.CreateSuccessResponse(responseContent);
+                }
+                else
+                {
+                    return BackendResponse<string?>.CreateFailureResponse("No response received from the AI client.");
+                }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BackendResponse<string?>.CreateFailureResponse("A concurrency error occurred. Please retry the request.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<string?>.CreateFailureResponse($"An error occurred.");
+            }
+        }
+
+        private void RecordUsageWithStripe(string customerId, long quantity)
+        {
+            StripeConfiguration.ApiKey = _stripeKey;
+
+            var options = new Stripe.Billing.MeterEventCreateOptions
+            {
+                EventName = _meterName,
+                Payload = new Dictionary<string, string>
+                {
+                    { "value", $"{quantity}" },
+                    { "stripe_customer_id", customerId },
+                },
             };
+            var service = new Stripe.Billing.MeterEventService();
+            service.Create(options);
+        }
 
-            var completionResponse = await _aiClient.ChatAsync(completionRequest);
-            return completionResponse.Messages?.LastOrDefault()?.Content;
+        public async Task<BackendResponse<string>> GenerateAndStoreApiKey(string username)
+        {
+            try
+            {
+                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null)
+                {
+                    return BackendResponse<string>.CreateFailureResponse("User not found.", System.Net.HttpStatusCode.NotFound);
+                }
 
+                // Generate a new API key
+                var apiKey = GenerateApiKey();
+
+                // Encrypt the API key
+                var encryptedApiKey = HashApiKey(apiKey);
+
+                // Update user profile
+                user.EncryptedApiKey = encryptedApiKey;
+                user.ApiKeyGeneratedDate = DateTime.UtcNow;
+
+                _dbContext.UserData.Update(user);
+                await _dbContext.SaveChangesAsync();
+
+                return BackendResponse<string>.CreateSuccessResponse(apiKey, "API key generated and stored successfully.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<string>.CreateFailureResponse($"Error generating API key.");
+            }
+        }
+
+        private string GenerateApiKey()
+        {
+            var apiKeyBytes = RandomNumberGenerator.GetBytes(32);
+            return Convert.ToBase64String(apiKeyBytes);
+        }
+
+        private string HashApiKey(string apiKey)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(apiKey));
+                return Convert.ToBase64String(hashedBytes);
+            }
         }
     }
 }

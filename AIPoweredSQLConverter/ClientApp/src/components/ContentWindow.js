@@ -31,7 +31,7 @@ function ContentWindow({ tableDefinitions, onAssistantSend, onSave }) {
     return (
         <div className="component-container">
             <div className="pane">
-                <label className="table-definitions-label">SQL Table Definition(s)</label>
+                <label className="table-definitions-label">SQL Table Schema(s)</label>
                 <textarea
                     className="table-definitions-input"
                     value={localTableDefinitions}
