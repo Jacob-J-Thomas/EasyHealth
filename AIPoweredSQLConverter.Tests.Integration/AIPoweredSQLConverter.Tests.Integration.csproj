@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AIPoweredSQLConverter\AIPoweredSQLConverter.csproj" />
     <ProjectReference Include="..\BoardGameBuddy\AIPoweredSQLConverter.csproj" />
   </ItemGroup>
 
