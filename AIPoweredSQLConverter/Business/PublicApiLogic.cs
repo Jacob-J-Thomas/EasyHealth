@@ -1,5 +1,6 @@
 ﻿using AIPoweredSQLConverter.API;
 using AIPoweredSQLConverter.Client.IntelligenceHub;
+using AIPoweredSQLConverter.ClientApp.src.components;
 using AIPoweredSQLConverter.DAL;
 using AIPoweredSQLConverter.DAL.Models;
 using AIPoweredSQLConverter.Host.Auth;
@@ -50,7 +51,7 @@ namespace AIPoweredSQLConverter.Business
             return BackendResponse<int>.CreateSuccessResponse(_maxRequestsPerDay - user.RequestCount);
         }
 
-        public async Task<BackendResponse<bool>> UpsertUserSQLData(FrontEndRequest request, string apiKey)
+        public async Task<BackendResponse<bool>> UpsertUserSQLData(ApiRequest request, string apiKey)
         {
             try
             {
@@ -95,7 +96,7 @@ namespace AIPoweredSQLConverter.Business
             }
         }
 
-        public async Task<BackendResponse<string?>> ConvertQueryToSQL(FrontEndRequest request, string apiKey)
+        public async Task<BackendResponse<string?>> ConvertQueryToSQL(ApiRequest request, string apiKey)
         {
             try
             {
@@ -135,19 +136,11 @@ namespace AIPoweredSQLConverter.Business
                 }
 
                 var completionContent = $"\n\nThe current time in UTC is {DateTime.UtcNow}. For context, I provided my current table definitions below:\n\n{user.UserSQLData}";
-                if (request.Messages.Any(x => x.Role == Role.User))
-                {
-                    request.Messages.Last(x => x.Role == Role.User).Content += completionContent;
-                }
-                else
-                {
-                    return BackendResponse<string?>.CreateFailureResponse("No user message found in the conversation.");
-                }
 
                 var completionRequest = new CompletionRequest
                 {
                     ProfileOptions = new Profile { Name = _sqlConversionProfile },
-                    Messages = request.Messages
+                    Messages = new List<Message>() { new Message() { Content = completionContent, Role = Role.User, TimeStamp = DateTime.UtcNow } }
                 };
 
                 var completionResponse = await _aiClient.ChatAsync(completionRequest);
@@ -175,6 +168,7 @@ namespace AIPoweredSQLConverter.Business
                 return Convert.ToBase64String(hashedBytes);
             }
         }
+
         private void RecordUsageWithStripe(string customerId, long quantity)
         {
             StripeConfiguration.ApiKey = _stripeKey;

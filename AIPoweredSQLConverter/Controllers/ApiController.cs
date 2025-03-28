@@ -10,6 +10,7 @@ using Stripe.Checkout;
 using System.Net;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using Microsoft.AspNetCore.Authorization;
+using AIPoweredSQLConverter.ClientApp.src.components;
 
 namespace AIPoweredSQLConverter.Controllers
 {
@@ -47,7 +48,7 @@ namespace AIPoweredSQLConverter.Controllers
         }
 
         [HttpPost("post/sqlData")]
-        public async Task<IActionResult> SaveSQLData([FromBody] FrontEndRequest requestBody)
+        public async Task<IActionResult> SaveSQLData([FromBody] ApiRequest requestBody)
         {
             try
             {
@@ -66,14 +67,14 @@ namespace AIPoweredSQLConverter.Controllers
         }
 
         [HttpPost("post/convertQuery")]
-        public async Task<IActionResult> ConvertQueryToSQL([FromBody] FrontEndRequest requestBody)
+        public async Task<IActionResult> ConvertQueryToSQL([FromBody] ApiRequest requestBody)
         {
             try
             {
                 if (requestBody == null) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "The request body is malformed." });
                 if (!Request.Headers.TryGetValue("x-api-key", out var apiKey)) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "The API key is required." });
 
-                if (!requestBody.Messages.Any(x => x.Role == Client.IntelligenceHub.Role.User)) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "A user query is required." });
+                if (string.IsNullOrEmpty(requestBody.Query)) return BadRequest(new PublicApiResponse { Success = false, ErrorMesssage = "A query is required." });
 
                 var response = await _apiLogic.ConvertQueryToSQL(requestBody, apiKey);
 

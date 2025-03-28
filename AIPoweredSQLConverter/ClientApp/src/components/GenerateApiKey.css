@@ -8,11 +8,11 @@
     position: relative;
     display: inline-block;
     padding: 0.75rem 1rem; /* Adjust padding for consistent height */
-    color: #ffffff; /* Text remains black */
+    color: #333; /* Text remains black */
     font-weight: bold;
     font-size: .8rem;
-    border: 2px solid #ffffff; /* Initial border color is black */
-    border-radius: 0.5rem; /* Rounded border */
+    border: 2px solid #333; /* Initial border color is black */
+    border-radius: 0.25rem; /* Rounded border */
     background-color: transparent;
     cursor: pointer;
     overflow: hidden; /* Hide the pseudo-element overflow */
