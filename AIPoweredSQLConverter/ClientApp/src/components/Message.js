@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './Message.css';
 import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw'; // <-- Import rehype-raw to process raw HTML
+import rehypeRaw from 'rehype-raw';
 
 export class Message extends Component {
     static displayName = Message.name;

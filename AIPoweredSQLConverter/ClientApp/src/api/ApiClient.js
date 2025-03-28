@@ -5,10 +5,8 @@ import { loadStripe } from '@stripe/stripe-js';
 // Initialize Stripe with your publishable key
 const stripePromise = loadStripe(authConfig.stripePublishableKey);
 
-const InappropriateRequestErrorMessage = "Your last message was flagged as unrelated to SQL. Please check your input.";
 const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at applied.ai.help@gmail.com.";
 const NullTableErrorMessage = "Please ensure you've attached SQL table schema(s) to the left.";
-const ConcurrencyErrorMessage = "A concurrency error occurred. Retrying your request.";
 const TooManyRequestsMessage = "Sorry, but it looks like your usage quota has been depleted. To sign up for pay as you go billing, you can do so here: "
 class ApiClient {
     constructor(baseUrl, getAccessTokenSilently) {

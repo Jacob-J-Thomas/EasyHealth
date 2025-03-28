@@ -5,9 +5,10 @@ import authConfig from '../auth_config.json';
 
 const StripePortalRedirect = () => {
     const { user, loginWithRedirect, getAccessTokenSilently } = useAuth0();
-    const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
+    
 
     useEffect(() => {
+        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
         async function createPortalSession() {
             if (!user || !user.sub) {
                 loginWithRedirect({
@@ -36,7 +37,7 @@ const StripePortalRedirect = () => {
         }
 
         createPortalSession();
-    }, [user, getAccessTokenSilently, apiClient]);
+    }, [user, getAccessTokenSilently, loginWithRedirect]);
 
     return <div>Redirecting to your customer portal...</div>;
 };

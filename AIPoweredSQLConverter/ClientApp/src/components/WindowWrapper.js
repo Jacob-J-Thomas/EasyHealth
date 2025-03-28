@@ -9,15 +9,12 @@ import ApiClient from '../api/ApiClient';
 import { NavMenu } from './NavMenu';
 import './WindowWrapper.css';
 import authConfig from '../auth_config.json';
-import { loadStripe } from '@stripe/stripe-js';
 
 // Initialize Stripe with your publishable key
-const stripePromise = loadStripe(authConfig.stripePublishableKey);
-const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at applied.ai.help@gmail.com.";
 const InnapropriateRequestErrorMessage = "Your last message was flagged as unrelated to SQL. Please check your input.";
 
 const WindowWrapper = () => {
-    const { isAuthenticated, getAccessTokenSilently, user, logout } = useAuth0();
+    const { isAuthenticated, getAccessTokenSilently, user } = useAuth0();
     const [state, setState] = useState({
         tableDefinitions: '',
         size: window.innerWidth < 1200 ? '50%' : '50%',
@@ -34,7 +31,7 @@ const WindowWrapper = () => {
     });
 
     // Initialize API client
-    const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
+    
 
     // Load messages from localStorage on mount
     useEffect(() => {
@@ -53,6 +50,7 @@ const WindowWrapper = () => {
     }, [state.messages]);
 
     useEffect(() => {
+        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
         const initialize = async () => {
             if (isAuthenticated) {
                 try {
@@ -79,9 +77,10 @@ const WindowWrapper = () => {
             }
         };
         initialize();
-    }, [isAuthenticated, getAccessTokenSilently]);
+    }, [isAuthenticated, getAccessTokenSilently, user.sub]);
 
     useEffect(() => {
+        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
         const handleStripeCheckoutClick = (event) => {
             if (event.target && event.target.id === 'stripe-checkout-link') {
                 event.preventDefault();
@@ -94,13 +93,15 @@ const WindowWrapper = () => {
         return () => {
             document.removeEventListener('click', handleStripeCheckoutClick);
         };
-    }, [apiClient]);
+    }, [getAccessTokenSilently, user.sub]);
 
     const requestSQLConversion = async (inputMessage) => {
         if (!user || !user.sub) {
             console.error('User is not authenticated or sub ID is missing');
             return;
         }
+
+        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
 
         const userId = user.sub;
         const newMessage = {
@@ -153,6 +154,7 @@ const WindowWrapper = () => {
             return;
         }
 
+        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
         const userId = user.sub;
 
         try {
@@ -184,6 +186,7 @@ const WindowWrapper = () => {
             return;
         }
 
+        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
         const userId = user.sub;
 
         try {
