@@ -7,3 +7,4 @@ const ProtectedWindowWrapper = withAuthenticationRequired(WindowWrapper, {
 });
 
 export default ProtectedWindowWrapper;
+

@@ -43,3 +43,4 @@ const StripePortalRedirect = () => {
 };
 
 export default StripePortalRedirect;
+
