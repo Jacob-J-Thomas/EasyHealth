@@ -160,10 +160,12 @@ namespace AIPoweredSQLConverter.Controllers
                     if (!string.IsNullOrEmpty(customerId))
                     {
                         var result = await _promptFlowLogic.MarkUserAsNonPaying(customerId);
-                        if (!result.Success) return StatusCode(StatusCodes.Status500InternalServerError, "Error updating non-paying status in the database.");
+                        if (!result.Success) return StatusCode(StatusCodes.Status500InternalServerError, $"result: {result.Message}");
+                        return Ok();
                     }
+                    return StatusCode(StatusCodes.Status500InternalServerError, $"session id error. client reference id or customer id error. customer id: {customerId}");
                 }
-                return Ok();
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error updating paying status in the database. stripe event: {stripeEvent.Type}");
             }
             catch (Exception ex)
             {
