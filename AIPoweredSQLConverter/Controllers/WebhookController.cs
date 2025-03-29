@@ -131,14 +131,17 @@ namespace AIPoweredSQLConverter.Controllers
                             // Call MarkUserAsPaying with client_reference_id instead of username
                             var result = await _promptFlowLogic.MarkUserAsPaying(clientReferenceId, customerId);
                             if (result.Success) return Ok();
+                            return StatusCode(StatusCodes.Status500InternalServerError, result.Message);
                         }
+                        return StatusCode(StatusCodes.Status500InternalServerError, $"session id error. client reference id or customer id error. reference id: {clientReferenceId}. customer id: {customerId}");
                     }
+                    return StatusCode(StatusCodes.Status500InternalServerError, $"session id error. session: {session}");
                 }
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating paying status in the database.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error updating paying status in the database. stripe event: {stripeEvent.Type}");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating non-paying status in the database.");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
