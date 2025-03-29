@@ -94,7 +94,7 @@ namespace AIPoweredSQLConverter.Business
                 var existingUser = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == sub);
                 if (existingUser != null)
                 {
-                    return BackendResponse<bool>.CreateFailureResponse("User already exists.");
+                    return BackendResponse<bool>.CreateSuccessResponse(true);
                 }
 
                 var newUser = new UserData
