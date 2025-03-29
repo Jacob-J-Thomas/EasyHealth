@@ -40,82 +40,67 @@ namespace AIPoweredSQLConverter.Controllers
         }
 
         [Authorize(Policy = "Auth0Policy")]
-        [HttpPost("create-portal-session/{username}")]
-        public async Task<IActionResult> CreatePortalSession([FromRoute] string username)
+        [HttpPost("create-checkout-session/{username}")]
+        public async IActionResult CreateCheckoutSession([FromRoute] string username)
         {
             try
             {
-                if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
+                if (string.IsNullOrEmpty(username)) return BadRequest("The sub ID is required.");
 
-                var customer = await _promptFlowLogic.GetUser(username);
-                if (customer.Data == null || string.IsNullOrEmpty(customer.Data.StripeCustomerId))
-                {
-                    // User doesn’t exist or has no Stripe customer ID, so they need to subscribe
-                    return await CreateCheckoutSessionAsync(username);
-                }
-
-                StripeConfiguration.ApiKey = _stripeKey;
-
-                // Check if the customer has an active subscription
-                var subscriptionService = new SubscriptionService();
-                var subscriptions = subscriptionService.List(new SubscriptionListOptions
-                {
-                    Customer = customer.Data.StripeCustomerId,
-                    Status = "active"
-                });
-
-                if (!subscriptions.Any())
-                {
-                    // No active subscription, redirect to checkout
-                    return await CreateCheckoutSessionAsync(username);
-                }
-
-                // User has an active subscription, create a portal session
-                var options = new Stripe.BillingPortal.SessionCreateOptions
-                {
-                    Customer = customer.Data.StripeCustomerId,
-                    ReturnUrl = _domain + "/home"
-                };
-                var service = new Stripe.BillingPortal.SessionService();
-                var session = service.Create(options);
-
-                return Ok(new { url = session.Url });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Something went wrong while creating the portal session: " + ex.Message);
-            }
-        }
-
-        private async Task<IActionResult> CreateCheckoutSessionAsync(string username)
-        {
-            try
-            {
                 StripeConfiguration.ApiKey = _stripeKey;
 
                 var options = new SessionCreateOptions
                 {
                     PaymentMethodTypes = new List<string> { "card" },
-                    LineItems = new List<SessionLineItemOptions>
-                    {
-                        new SessionLineItemOptions { Price = _meterPriceKey }
-                    },
+                    LineItems = new List<SessionLineItemOptions> { new SessionLineItemOptions { Price = _meterPriceKey }, },
                     Mode = "subscription",
                     SuccessUrl = _domain + "/home",
                     CancelUrl = _domain + "/home",
-                    ClientReferenceId = username
+                    // Pass the user's identifier so that you can update your DB later.
+                    ClientReferenceId = username // Replace with the actual username
                 };
 
                 var service = new SessionService();
-                var session = await service.CreateAsync(options);
+                Stripe.Checkout.Session session = service.Create(options);
 
                 return Ok(new { sessionId = session.Id });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Something went wrong when creating the checkout session: " + ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
+            }
+        }
+
+        [Authorize(Policy = "Auth0Policy")]
+        [HttpPost("create-portal-session/{username}")]
+        public async Task<IActionResult> CreatePortalSession([FromRoute] string username)
+        {
+            try
+            {
+                // In this example we expect the customer identifier to be sent as "sub".
+                // Adjust accordingly if you store your Stripe customer id differently.
+                if (string.IsNullOrEmpty(username)) return BadRequest("The customer ID is required.");
+
+                // if user has no subscription data, redirect to checkout
+                var customer = await _promptFlowLogic.GetUser(username);
+                if (customer.Data == null || !customer.Data.IsPayingCustomer) return CreateCheckoutSession(username); // fix this implementation
+
+                StripeConfiguration.ApiKey = _stripeKey;
+
+                var options = new Stripe.BillingPortal.SessionCreateOptions
+                {
+                    Customer = customer.Data.StripeCustomerId,
+                    ReturnUrl = _domain + "/home",
+                };
+
+                var service = new Stripe.BillingPortal.SessionService();
+                var session = service.Create(options);
+
+                return Ok(new { url = session.Url });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong while creating the portal session");
             }
         }
 
@@ -137,10 +122,10 @@ namespace AIPoweredSQLConverter.Controllers
                     {
                         // Extract client_reference_id and customer ID from the session
                         var clientReferenceId = session.ClientReferenceId;
-                        var customerId = session.Customer?.Id;
+                        var customerId = session.CustomerId;
 
                         // Ensure both required fields are present
-                        if (!string.IsNullOrEmpty(clientReferenceId))// && !string.IsNullOrEmpty(customerId))
+                        if (!string.IsNullOrEmpty(clientReferenceId) && !string.IsNullOrEmpty(customerId))
                         {
                             // Call MarkUserAsPaying with client_reference_id instead of username
                             var result = await _promptFlowLogic.MarkUserAsPaying(clientReferenceId, customerId);
@@ -171,7 +156,7 @@ namespace AIPoweredSQLConverter.Controllers
                 if (stripeEvent.Type == "customer.subscription.deleted")
                 {
                     var subscription = stripeEvent.Data.Object as Stripe.Subscription;
-                    var customerId = subscription?.Customer?.Id;
+                    var customerId = subscription?.Customer?.Id ?? subscription?.CustomerId;
                     if (!string.IsNullOrEmpty(customerId))
                     {
                         var result = await _promptFlowLogic.MarkUserAsNonPaying(customerId);
