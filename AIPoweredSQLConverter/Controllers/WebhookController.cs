@@ -115,7 +115,7 @@ namespace AIPoweredSQLConverter.Controllers
                 var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], _signupWebhookKey);
 
                 // Check for the subscription creation event (indicating a new paying user)
-                if (stripeEvent.Type == "checkout.session.completed")
+                if (stripeEvent.Type == "customer.subscription.created")
                 {
                     var subscription = stripeEvent.Data.Object as Stripe.Subscription;
                     // Retrieve the username from metadata
