@@ -64,6 +64,24 @@ namespace AIPoweredSQLConverter.Controllers
             }
         }
 
+        [HttpPost("post/saveUser/{username}")]
+        public async Task<IActionResult> SaveUserData([FromRoute] string username)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(username)) return BadRequest("The sub ID is required.");
+
+                var response = await _promptFlowLogic.SaveNewUser(username);
+
+                if (response.Success) return Ok(response.Data);
+                else return StatusCode((int)response.StatusCode, response.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when saving user data");
+            }
+        }
+
         [HttpPost("post/sqlData")]
         public async Task<IActionResult> SaveSQLData([FromBody] FrontEndRequest requestBody)
         {

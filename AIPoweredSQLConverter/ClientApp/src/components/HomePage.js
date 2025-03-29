@@ -11,7 +11,7 @@ function HomePage() {
     const handleSignUp = () => {
         loginWithRedirect({
             authorizationParams: {
-                audience: authConfig.ApiUri,
+                audience: authConfig.audience, // Consistent audience
                 scope: authConfig.scope,
             },
         });
@@ -109,4 +109,3 @@ function HomePage() {
 }
 
 export default HomePage;
-

@@ -43,6 +43,19 @@ class ApiClient {
         this.redirectToStripeCheckout = this.redirectToStripeCheckout.bind(this);
     }
 
+    async saveUserData(sub) {
+        try {
+            const response = await this.client.post(`/promptflow/post/saveUser/${sub}`);
+            if (response.status === 200) {
+                return response.data;
+            } else {
+                return DefaultErrorMessage;
+            }
+        } catch (error) {
+            return DefaultErrorMessage;
+        }
+    }
+
     // Helper method to retry a request
     async retryRequest(fn, retries = 3) {
         for (let attempt = 0; attempt < retries; attempt++) {

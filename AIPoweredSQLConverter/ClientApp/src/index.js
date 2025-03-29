@@ -15,7 +15,6 @@ const onRedirectCallback = (appState) => {
         document.title,
         appState?.returnTo || window.location.pathname
     );
-
     // Clear messages from local storage on sign out
     if (!appState || appState.returnTo === '/logout') {
         localStorage.removeItem('messages');
@@ -30,8 +29,8 @@ root.render(
         domain={authConfig.domain}
         clientId={authConfig.clientId}
         authorizationParams={{
-            redirect_uri: authConfig.redirectUri, // Ensure this matches auth_config.json
-            audience: authConfig.audience,
+            redirect_uri: authConfig.redirectUri,
+            audience: authConfig.audience, // Use a consistent audience here
             scope: authConfig.scope,
         }}
         onRedirectCallback={onRedirectCallback}
@@ -42,29 +41,8 @@ root.render(
     </Auth0Provider>
 );
 
-// Initialize Application Insights
-//function initializeAppInsights() {
-//    const appInsights = new ApplicationInsights({
-//        config: {
-//            instrumentationKey: 'YOUR_INSTRUMENTATION_KEY' // Replace with your actual instrumentation key
-//        }
-//    });
-//    appInsights.loadAppInsights();
-//    return appInsights;
-//}
-
-//const appInsights = initializeAppInsights();
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.unregister();
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals(metric => {
-    //appInsights.trackMetric({ name: metric.name, average: metric.value });
     console.log("App Insight Metric Written:\n", { name: metric.name, average: metric.value });
 });
-

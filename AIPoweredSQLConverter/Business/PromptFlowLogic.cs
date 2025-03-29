@@ -87,6 +87,36 @@ namespace AIPoweredSQLConverter.Business
             }
         }
 
+        public async Task<BackendResponse<bool>> SaveNewUser(string sub)
+        {
+            try
+            {
+                var existingUser = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == sub);
+                if (existingUser != null)
+                {
+                    return BackendResponse<bool>.CreateFailureResponse("User already exists.");
+                }
+
+                var newUser = new UserData
+                {
+                    Username = sub,
+                    IsPayingCustomer = false,
+                    RequestCount = 0,
+                    LastRequestDate = null,
+                    RowVersion = new byte[0]
+                };
+
+                await _dbContext.UserData.AddAsync(newUser);
+                await _dbContext.SaveChangesAsync();
+
+                return BackendResponse<bool>.CreateSuccessResponse(true, "User saved successfully.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<bool>.CreateFailureResponse("Error saving user.");
+            }
+        }
+
         public async Task<BackendResponse<bool>> UpsertUserSQLData(FrontEndRequest request)
         {
             try

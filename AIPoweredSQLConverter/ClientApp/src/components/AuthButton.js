@@ -1,4 +1,3 @@
-// AuthButton.js
 import React from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
 import './AuthButton.css';
@@ -21,8 +20,8 @@ const AuthButton = () => {
             onClick={() =>
                 loginWithRedirect({
                     authorizationParams: {
-                        audience: authConfig.ApiUri,
-                        scope: authConfig.scope, 
+                        audience: authConfig.audience, // Updated audience value
+                        scope: authConfig.scope,
                     },
                 })
             }
@@ -34,4 +33,3 @@ const AuthButton = () => {
 };
 
 export default AuthButton;
-
