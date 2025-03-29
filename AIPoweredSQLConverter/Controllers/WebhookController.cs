@@ -41,7 +41,7 @@ namespace AIPoweredSQLConverter.Controllers
 
         [Authorize(Policy = "Auth0Policy")]
         [HttpPost("create-checkout-session/{username}")]
-        public async IActionResult CreateCheckoutSession([FromRoute] string username)
+        public IActionResult CreateCheckoutSession([FromRoute] string username)
         {
             try
             {
