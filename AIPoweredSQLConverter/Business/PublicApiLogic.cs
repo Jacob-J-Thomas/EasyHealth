@@ -135,7 +135,7 @@ namespace AIPoweredSQLConverter.Business
                     RecordUsageWithStripe(user.StripeCustomerId, 1);
                 }
 
-                var completionContent = $"\n\nThe current time in UTC is {DateTime.UtcNow}. For context, I provided my current table definitions below:\n\n{user.UserSQLData}";
+                var completionContent = request.Query + $"\n\n. For context, the current time in UTC is {DateTime.UtcNow}, and I provided my current table definitions below:\n\n{user.UserSQLData}";
 
                 var completionRequest = new CompletionRequest
                 {
