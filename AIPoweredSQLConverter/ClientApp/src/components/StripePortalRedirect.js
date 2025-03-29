@@ -22,7 +22,7 @@ const StripePortalRedirect = () => {
 
             try {
                 const data = await apiClient.createPortalSession(user.sub);
-                if (data.url) {
+                if (data && data.url) {
                     window.location.replace(data.url); // Use window.location.replace to avoid adding to history
                 }
                 else if (data.sessionId) {
