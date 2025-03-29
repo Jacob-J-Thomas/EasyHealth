@@ -59,7 +59,7 @@ namespace AIPoweredSQLConverter.Business
                 var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
                 if (user == null) return BackendResponse<bool>.CreateFailureResponse("User not found.");
                 user.IsPayingCustomer = true;
-                //user.StripeCustomerId = customerId;
+                user.StripeCustomerId = customerId;
                 _dbContext.UserData.Update(user);
                 await _dbContext.SaveChangesAsync();
                 return BackendResponse<bool>.CreateSuccessResponse(true, "User updated to paying status.");
