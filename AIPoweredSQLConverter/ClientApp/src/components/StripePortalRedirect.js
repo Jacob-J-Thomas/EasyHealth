@@ -5,31 +5,33 @@ import authConfig from '../auth_config.json';
 
 const StripePortalRedirect = () => {
     const { user, loginWithRedirect, getAccessTokenSilently } = useAuth0();
-    
 
     useEffect(() => {
         const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
+
         async function createPortalSession() {
             if (!user || !user.sub) {
                 loginWithRedirect({
                     authorizationParams: {
-                        audience: authConfig.ApiUri, // Your API identifier
-                        scope: authConfig.scope,                   // The scope your API requires
+                        audience: authConfig.ApiUri,
+                        scope: authConfig.scope,
                     },
-                })
+                });
                 return;
             }
 
             try {
                 const data = await apiClient.createPortalSession(user.sub);
-                if (data && data.url) {
-                    window.location.replace(data.url); // Use window.location.replace to avoid adding to history
-                }
-                else if (data.sessionId) {
-                    apiClient.redirectToStripeCheckout(user.sub, data.sessionId);
-                }
-                else {
-                    console.error("Something went wrong when performing a stripe redirect.");
+                if (data) {
+                    if (data.url) {
+                        window.location.replace(data.url); // Redirect to portal
+                    } else if (data.sessionId) {
+                        await apiClient.redirectToStripeCheckout(user.sub, data.sessionId); // Redirect to checkout
+                    } else {
+                        console.error("Invalid response from createPortalSession:", data);
+                    }
+                } else {
+                    console.error("Failed to create portal session: No data returned.");
                 }
             } catch (error) {
                 console.error('Error creating portal session:', error);
@@ -39,8 +41,7 @@ const StripePortalRedirect = () => {
         createPortalSession();
     }, [user, getAccessTokenSilently, loginWithRedirect]);
 
-    return <div>Redirecting to your customer portal...</div>;
+    return <div>Redirecting to your subscription management page...</div>;
 };
 
 export default StripePortalRedirect;
-
