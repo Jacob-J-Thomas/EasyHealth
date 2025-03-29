@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import FooterSection from './FooterSection';
 import { NavMenu } from './NavMenu';
 import { useAuth0 } from "@auth0/auth0-react";

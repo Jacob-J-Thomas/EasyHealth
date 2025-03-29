@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 import authConfig from '../auth_config.json';
 import { loadStripe } from '@stripe/stripe-js';
 

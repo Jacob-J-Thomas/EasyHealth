@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import ApiClient from '../api/ApiClient';
 import authConfig from '../auth_config.json';
