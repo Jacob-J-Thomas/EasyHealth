@@ -10,6 +10,7 @@ using Stripe.Checkout;
 using System.Net;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace AIPoweredSQLConverter.Controllers
 {
@@ -107,41 +108,37 @@ namespace AIPoweredSQLConverter.Controllers
         [HttpPost("stripe-update-ispaying")]
         public async Task<IActionResult> StripeWebhookPaying()
         {
-            // Read the raw JSON from the request body.
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-
             try
             {
-                // Construct the event using Stripe's utility
+                // Verify and construct the Stripe event using your webhook secret
                 var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], _signupWebhookKey);
 
-                // Check for the subscription creation event (indicating a new paying user)
-                if (stripeEvent.Type == "customer.subscription.created")
+                // Check if the event is "checkout.session.completed"
+                if (stripeEvent.Type == "checkout.session.completed")
                 {
-                    var subscription = stripeEvent.Data.Object as Stripe.Subscription;
-                    // Retrieve the username from metadata
-                    var username = subscription?.Metadata["username"];
-                    // Retrieve the customer ID from the subscription
-                    var customerId = subscription?.Customer.Id;
-
-                    if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(customerId))
+                    // Cast the event data to a Stripe Checkout Session object
+                    var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                    if (session != null)
                     {
-                        // Update the user's record to mark them as paying, including the customerID.
-                        var result = await _promptFlowLogic.MarkUserAsPaying(username, customerId);
-                        if (!result.Success)
+                        // Extract client_reference_id and customer ID from the session
+                        var clientReferenceId = session.ClientReferenceId;
+                        var customerId = session.Customer?.Id;
+
+                        // Ensure both required fields are present
+                        if (!string.IsNullOrEmpty(clientReferenceId) && !string.IsNullOrEmpty(customerId))
                         {
-                            // Optionally log the error and return a non-200 response if needed.
-                            return StatusCode(StatusCodes.Status500InternalServerError, "Error updating paying status in the database.");
+                            // Call MarkUserAsPaying with client_reference_id instead of username
+                            var result = await _promptFlowLogic.MarkUserAsPaying(clientReferenceId, customerId);
+                            if (result.Success) return Ok();
                         }
                     }
                 }
-
-                // Acknowledge receipt of the event.
-                return Ok();
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating paying status in the database.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating non-paying status in the database.");
             }
         }
 
@@ -150,36 +147,25 @@ namespace AIPoweredSQLConverter.Controllers
         [HttpPost("stripe-update-isnonpaying")]
         public async Task<IActionResult> StripeWebhookNonPaying()
         {
-            // Read the raw JSON from the request body.
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-
             try
             {
                 var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], _cancelationWebhookKey);
-
                 if (stripeEvent.Type == "customer.subscription.deleted")
                 {
                     var subscription = stripeEvent.Data.Object as Stripe.Subscription;
-                    // Use the ClientReferenceId (or metadata) to identify the user.
-                    var username = subscription?.Metadata["username"];
-                    if (!string.IsNullOrEmpty(username))
+                    var customerId = subscription?.Customer?.Id;
+                    if (!string.IsNullOrEmpty(customerId))
                     {
-                        // Update the user's record to mark them as non-paying.
-                        var result = await _promptFlowLogic.MarkUserAsNonPaying(username);
-                        if (!result.Success)
-                        {
-                            // Optionally log the error and return a non-200 response if needed.
-                            return StatusCode(StatusCodes.Status500InternalServerError, "Error updating non-paying status in the database.");
-                        }
+                        var result = await _promptFlowLogic.MarkUserAsNonPaying(customerId);
+                        if (!result.Success) return StatusCode(StatusCodes.Status500InternalServerError, "Error updating non-paying status in the database.");
                     }
                 }
-
-                // Acknowledge receipt of the event.
                 return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating non-paying status in the database.");
             }
         }
     }

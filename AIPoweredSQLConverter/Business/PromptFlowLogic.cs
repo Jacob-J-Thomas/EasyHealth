@@ -56,7 +56,7 @@ namespace AIPoweredSQLConverter.Business
         {
             try
             {
-                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.StripeCustomerId == username);
                 if (user == null) return BackendResponse<bool>.CreateFailureResponse("User not found.");
                 user.IsPayingCustomer = true;
                 user.StripeCustomerId = customerId;
@@ -70,11 +70,11 @@ namespace AIPoweredSQLConverter.Business
             }
         }
 
-        public async Task<BackendResponse<bool>> MarkUserAsNonPaying(string username)
+        public async Task<BackendResponse<bool>> MarkUserAsNonPaying(string customerId)
         {
             try
             {
-                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.StripeCustomerId == customerId);
                 if (user == null) return BackendResponse<bool>.CreateFailureResponse("User not found.");
                 user.IsPayingCustomer = false;
                 _dbContext.UserData.Update(user);
