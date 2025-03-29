@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace AIPoweredSQLConverter.Controllers
 {
     [ApiController]
-    [Authorize]
     [Route("[controller]")]
     public class WebhookController : ControllerBase
     {
@@ -39,6 +38,7 @@ namespace AIPoweredSQLConverter.Controllers
             _domain = settings.Domain;
         }
 
+        [Authorize(Policy = "Auth0Policy")]
         [HttpPost("create-checkout-session/{username}")]
         public IActionResult CreateCheckoutSession([FromRoute] string username)
         {
@@ -71,6 +71,7 @@ namespace AIPoweredSQLConverter.Controllers
             }
         }
 
+        [Authorize(Policy = "Auth0Policy")]
         [HttpPost("create-portal-session/{username}")]
         public async Task<IActionResult> CreatePortalSession([FromRoute] string username)
         {
