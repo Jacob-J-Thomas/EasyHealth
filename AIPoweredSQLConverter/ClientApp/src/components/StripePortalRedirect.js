@@ -25,7 +25,7 @@ const StripePortalRedirect = () => {
                 if (data && data.url) {
                     window.location.replace(data.url); // Use window.location.replace to avoid adding to history
                 }
-                else if (data.sessionId) {
+                else if (data && data.sessionId) {
                     apiClient.redirectToStripeCheckout(user.sub, data.sessionId);
                 }
                 else {
