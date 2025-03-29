@@ -126,7 +126,7 @@ namespace AIPoweredSQLConverter.Controllers
                         var customerId = session.Customer?.Id;
 
                         // Ensure both required fields are present
-                        if (!string.IsNullOrEmpty(clientReferenceId) && !string.IsNullOrEmpty(customerId))
+                        if (!string.IsNullOrEmpty(clientReferenceId))// && !string.IsNullOrEmpty(customerId))
                         {
                             // Call MarkUserAsPaying with client_reference_id instead of username
                             var result = await _promptFlowLogic.MarkUserAsPaying(clientReferenceId, customerId);
