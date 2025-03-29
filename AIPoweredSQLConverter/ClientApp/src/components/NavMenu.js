@@ -47,7 +47,7 @@ export class NavMenu extends Component {
                                     <NavLink tag={Link} className={`text-dark ${pathname === '/reference' ? 'active' : ''}`} to="/reference">API Reference</NavLink>
                                 </NavItem>
                                 <NavItem>
-                                    <NavLink tag={Link} className="text-dark" to="/stripe-portal">Sign Up / Manage Subscription</NavLink>
+                                    <NavLink tag={Link} className="text-dark" to="/stripe-portal">Manage Subscription</NavLink>
                                 </NavItem>
                             </div>
                         </div>
