@@ -22,7 +22,6 @@ namespace AIPoweredSQLConverter.Business
         private const string _sqlConversionProfile = "NLSequelConverter";
         private const string _sqlValidationProfile = "SqlValidator";
 
-        private readonly string _encryptionKey;
         private readonly string _meterName;
         private readonly string _stripeKey;
 
@@ -31,7 +30,6 @@ namespace AIPoweredSQLConverter.Business
             _aiClient = aiClient;
             _dbContext = context;
 
-            _encryptionKey = settings.ApiEncryptionKey;
             _meterName = settings.MeterName;
             _stripeKey = settings.SecretKey;
         }

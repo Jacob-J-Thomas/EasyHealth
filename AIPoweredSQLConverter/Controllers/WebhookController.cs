@@ -77,13 +77,11 @@ namespace AIPoweredSQLConverter.Controllers
         {
             try
             {
-                // In this example we expect the customer identifier to be sent as "sub".
-                // Adjust accordingly if you store your Stripe customer id differently.
                 if (string.IsNullOrEmpty(username)) return BadRequest("The customer ID is required.");
 
                 // if user has no subscription data, redirect to checkout
                 var customer = await _promptFlowLogic.GetUser(username);
-                if (customer.Data == null || !customer.Data.IsPayingCustomer) return CreateCheckoutSession(username); // fix this implementation
+                if (customer.Data == null || !customer.Data.IsPayingCustomer) return CreateCheckoutSession(username);
 
                 StripeConfiguration.ApiKey = _stripeKey;
 
@@ -127,20 +125,16 @@ namespace AIPoweredSQLConverter.Controllers
                         // Ensure both required fields are present
                         if (!string.IsNullOrEmpty(clientReferenceId) && !string.IsNullOrEmpty(customerId))
                         {
-                            // Call MarkUserAsPaying with client_reference_id instead of username
                             var result = await _promptFlowLogic.MarkUserAsPaying(clientReferenceId, customerId);
                             if (result.Success) return Ok();
-                            return StatusCode(StatusCodes.Status500InternalServerError, result.Message);
                         }
-                        return StatusCode(StatusCodes.Status500InternalServerError, $"session id error. client reference id or customer id error. reference id: {clientReferenceId}. customer id: {customerId}");
                     }
-                    return StatusCode(StatusCodes.Status500InternalServerError, $"session id error. session: {session}");
                 }
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error updating paying status in the database. stripe event: {stripeEvent.Type}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error updating paying status in the database.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating the paying status in the database.");
             }
         }
 
@@ -160,14 +154,12 @@ namespace AIPoweredSQLConverter.Controllers
                     if (!string.IsNullOrEmpty(customerId))
                     {
                         var result = await _promptFlowLogic.MarkUserAsNonPaying(customerId);
-                        if (!result.Success) return StatusCode(StatusCodes.Status500InternalServerError, $"result: {result.Message}");
-                        return Ok();
+                        if (result.Success) return Ok();
                     }
-                    return StatusCode(StatusCodes.Status500InternalServerError, $"session id error. client reference id or customer id error. customer id: {customerId}");
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error updating paying status in the database. stripe event: {stripeEvent.Type}");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error updating non-paying status in the database.");
             }

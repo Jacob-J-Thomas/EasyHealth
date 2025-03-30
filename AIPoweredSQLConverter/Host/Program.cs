@@ -49,7 +49,7 @@ namespace AIPoweredSQLConverter.Host
             if (string.IsNullOrEmpty(stripeSettings.SecretKey) || string.IsNullOrEmpty(stripeSettings.PublishableKey)
                 || string.IsNullOrEmpty(stripeSettings.SignupWebhookKey) || string.IsNullOrEmpty(stripeSettings.CancelationWebhookKey)
                 || string.IsNullOrEmpty(stripeSettings.Domain) || string.IsNullOrEmpty(stripeSettings.MeterName)
-                || string.IsNullOrEmpty(stripeSettings.MeterPriceKey) || string.IsNullOrEmpty(stripeSettings.ApiEncryptionKey))
+                || string.IsNullOrEmpty(stripeSettings.MeterPriceKey))
             {
                 throw new ArgumentException("Stripe Settings cannot be null or empty.");
             }

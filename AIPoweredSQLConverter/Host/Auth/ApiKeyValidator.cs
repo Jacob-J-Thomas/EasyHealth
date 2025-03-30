@@ -10,12 +10,10 @@ namespace AIPoweredSQLConverter.Host.Auth
     public class ApiKeyValidator : IApiKeyValidator
     {
         private readonly AppDbContext _dbContext;
-        private readonly string _encryptionKey;
 
-        public ApiKeyValidator(AppDbContext dbContext, StripeSettings stripeSettings)
+        public ApiKeyValidator(AppDbContext dbContext)
         {
             _dbContext = dbContext;
-            _encryptionKey = stripeSettings.ApiEncryptionKey;
         }
 
         public async Task<UserData?> ValidateApiKeyAsync(string encryptedApiKey)
