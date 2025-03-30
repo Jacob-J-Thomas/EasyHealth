@@ -21,6 +21,7 @@ namespace AIPoweredSQLConverter.Business
 
         private const int _maxRequestsPerDay = 20;
         private const string _sqlConversionProfile = "NLSequelConverter";
+        private const string _sqlValidationProfile = "SqlValidator";
 
         private readonly string _meterName;
         private readonly string _stripeKey;
@@ -146,8 +147,16 @@ namespace AIPoweredSQLConverter.Business
                 var completionResponse = await _aiClient.ChatAsync(completionRequest);
                 var responseContent = completionResponse.Messages?.LastOrDefault()?.Content;
 
-                return !string.IsNullOrEmpty(responseContent)
-                    ? BackendResponse<string?>.CreateSuccessResponse(responseContent)
+                var validationRequest = new CompletionRequest()
+                {
+                    ProfileOptions = new Profile() { Name = _sqlValidationProfile },
+                    Messages = new List<Message>() { new Message() { Content = responseContent, Role = Role.User } }
+                };
+                var validationResponse = await _aiClient.ChatAsync(validationRequest);
+                var cleanedResponseContent = validationRequest.Messages?.LastOrDefault()?.Content;
+
+                return !string.IsNullOrEmpty(cleanedResponseContent)
+                    ? BackendResponse<string?>.CreateSuccessResponse(cleanedResponseContent)
                     : BackendResponse<string?>.CreateFailureResponse("No response received from the AI client.");
             }
             catch (DbUpdateConcurrencyException)

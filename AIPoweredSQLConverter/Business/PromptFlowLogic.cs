@@ -20,6 +20,7 @@ namespace AIPoweredSQLConverter.Business
 
         private const string _sqlDataConstructionProfile = "NLSequelDataConstructionHelper";
         private const string _sqlConversionProfile = "NLSequelConverter";
+        private const string _sqlValidationProfile = "SqlValidator";
 
         private readonly string _encryptionKey;
         private readonly string _meterName;
@@ -299,9 +300,17 @@ namespace AIPoweredSQLConverter.Business
                 var completionResponse = await _aiClient.ChatAsync(completionRequest);
                 var responseContent = completionResponse.Messages?.LastOrDefault()?.Content;
 
-                if (!string.IsNullOrEmpty(responseContent))
+                var validationRequest = new CompletionRequest()
                 {
-                    return BackendResponse<string?>.CreateSuccessResponse(responseContent);
+                    ProfileOptions = new Profile() { Name = _sqlValidationProfile },
+                    Messages = new List<Message>() { new Message() { Content = responseContent, Role = Role.User } }
+                };
+                var validationResponse = await _aiClient.ChatAsync(validationRequest);
+                var cleanedResponseContent = validationRequest.Messages?.LastOrDefault()?.Content;
+
+                if (!string.IsNullOrEmpty(cleanedResponseContent))
+                {
+                    return BackendResponse<string?>.CreateSuccessResponse(cleanedResponseContent);
                 }
                 else
                 {
