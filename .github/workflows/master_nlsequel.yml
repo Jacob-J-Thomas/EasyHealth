@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - NLSequel-dev
+name: Build and deploy ASP.Net Core app to Azure Web App - NLSequel
 
 on:
   push:
@@ -54,15 +54,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_246417F9F017468A846943D678968AFC }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_652BCCB883684991A761C5D60AA3D93A }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B67CBE9406E14B5AAD7D5DFF0E42C096 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_CBA65919457846C1AA74BCDCC01FBFAF }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A5D1288C8223427D852306CB1026683D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_330DDC1CBAAD443E94B4890F87D61DC1 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'NLSequel-dev'
+          app-name: 'NLSequel'
           slot-name: 'Production'
           package: .
           
