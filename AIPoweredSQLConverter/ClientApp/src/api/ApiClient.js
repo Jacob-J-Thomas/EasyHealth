@@ -78,7 +78,7 @@ class ApiClient {
 
     async createPortalSession(sub) {
         try {
-            const response = await this.client.post(`webhook/create-portal-session/${sub}`);
+            const response = await this.client.post(`/webhook/create-portal-session/${sub}`);
             if (response.status === 200) {
                 if (response.data) return response.data;
             } else {
@@ -93,7 +93,7 @@ class ApiClient {
 
     async createCheckoutSession(sub) {
         try {
-            const response = await this.client.post(`webhook/create-checkout-session/${sub}`);
+            const response = await this.client.post(`/webhook/create-checkout-session/${sub}`);
             if (response.status === 200) {
                 return response.data.sessionId;
             } else {
@@ -127,7 +127,7 @@ class ApiClient {
 
     async getNewAPIKey(username) {
         try {
-            const response = await this.client.get(`promptflow/get/newAPIKey/${username}`);
+            const response = await this.client.get(`/promptflow/get/newAPIKey/${username}`);
             if (response.status === 200) {
                 return response.data;
             } else {
@@ -140,7 +140,7 @@ class ApiClient {
 
     async getSQLData(username) {
         try {
-            const response = await this.client.get('promptflow/get/sqlData/' + username);
+            const response = await this.client.get('/promptflow/get/sqlData/' + username);
             if (response.status === 200) {
                 return response.data;
             } else {
@@ -159,7 +159,7 @@ class ApiClient {
                 SqlData: sqlDefinitionsString,
             };
 
-            const response = await this.client.post('promptflow/post/sqlData', body);
+            const response = await this.client.post('/promptflow/post/sqlData', body);
             if (response.status === 204) {
                 return response.data;
             } else {
@@ -179,7 +179,7 @@ class ApiClient {
             };
 
             const makeRequest = async () => {
-                const response = await this.client.post('promptflow/post/sqlHelp', body);
+                const response = await this.client.post('/promptflow/post/sqlHelp', body);
                 if (response.status === 200) {
                     return response.data;
                 } else {
@@ -208,7 +208,7 @@ class ApiClient {
 
             const makeRequest = async () => {
                 try {
-                    const response = await this.client.post('promptflow/post/convertQuery', body);
+                    const response = await this.client.post('/promptflow/post/convertQuery', body);
                     return response.data; // If 200, we get here
                 } catch (error) {
                     if (error.response && error.response.status === 429) {
