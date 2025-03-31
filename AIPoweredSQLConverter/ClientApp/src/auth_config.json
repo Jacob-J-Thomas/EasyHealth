@@ -1,6 +1,6 @@
 {
   "domain": "applied-ai.us.auth0.com",
-  "clientId": "mZfKGJg2vOrNJFY99tBk4AohGSQydx2K",
+  "clientId": "KqaPNWPUSMLHkLvQjH6uGXaGv1Rp30Nc",
   "audience": "https://nlsequel.azurewebsites.net",
   "scope": "openid profile email sub",
   "ApiUri": "https://nlsequel.azurewebsites.net",
