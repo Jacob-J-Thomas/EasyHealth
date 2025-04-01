@@ -110,9 +110,9 @@ namespace AIPoweredSQLConverter.Business
 
                 return BackendResponse<bool>.CreateSuccessResponse(true, "User saved successfully.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BackendResponse<bool>.CreateFailureResponse($"Error saving user: {ex.Message}");
+                return BackendResponse<bool>.CreateFailureResponse($"Error saving user.");
             }
         }
 
