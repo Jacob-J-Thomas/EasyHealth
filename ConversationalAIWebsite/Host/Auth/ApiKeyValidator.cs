@@ -16,9 +16,9 @@ namespace ConversationalAIWebsite.Host.Auth
             _dbContext = dbContext;
         }
 
-        public async Task<UserData?> ValidateApiKeyAsync(string encryptedApiKey)
+        public async Task<Users?> ValidateApiKeyAsync(string encryptedApiKey)
         {
-            var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.EncryptedApiKey == encryptedApiKey);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.EncryptedApiKey == encryptedApiKey);
             if (user == null)
                 return null;
 

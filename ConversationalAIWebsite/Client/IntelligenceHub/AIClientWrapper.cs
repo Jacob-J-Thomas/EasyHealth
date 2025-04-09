@@ -1,5 +1,6 @@
 ﻿
 using ConversationalAIWebsite.API.Config;
+using ConversationalAIWebsite.Common;
 
 namespace ConversationalAIWebsite.Client.IntelligenceHub
 {

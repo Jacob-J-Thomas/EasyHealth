@@ -1,5 +1,6 @@
 ﻿using ConversationalAIWebsite.API;
 using ConversationalAIWebsite.API.Config;
+using ConversationalAIWebsite.Common;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -17,7 +18,7 @@ namespace ConversationalAIWebsite.Client.IntelligenceHub
 
         public AIAuthClient(IntelligenceHubAuthSettings settings, IHttpClientFactory factory)
         {
-            _client = factory.CreateClient();
+            _client = factory.CreateClient(Policies.RetryPolicy);
             _authEndpoint = settings.Endpoint;
 
             _request = new AuthRequest()

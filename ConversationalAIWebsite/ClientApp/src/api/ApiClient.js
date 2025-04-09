@@ -6,8 +6,8 @@ import { loadStripe } from '@stripe/stripe-js';
 const stripePromise = loadStripe(authConfig.stripePublishableKey);
 
 const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at applied.ai.help@gmail.com.";
-const NullTableErrorMessage = "Please ensure you've attached SQL table schema(s) to the left.";
-const TooManyRequestsMessage = "Sorry, but it looks like your usage quota has been depleted. To sign up for pay as you go billing, you can do so here: "
+const profileName = 'test';
+
 class ApiClient {
     constructor(baseUrl, getAccessTokenSilently) {
         this.baseUrl = baseUrl;
@@ -31,8 +31,7 @@ class ApiClient {
                         config.headers.Authorization = `Bearer ${token}`;
                     }
                 } catch (error) {
-                    console.error('Error fetching access token:', error);
-                    throw new Error("Authorization error");
+
                 }
                 return config;
             },
@@ -43,9 +42,28 @@ class ApiClient {
         this.redirectToStripeCheckout = this.redirectToStripeCheckout.bind(this);
     }
 
-    async saveUserData(sub) {
+    // Helper method to retry a request
+    async retryRequest(fn, retries = 6) {
+        for (let attempt = 0; attempt < retries; attempt++) {
+            try {
+                return await fn();
+            } catch (error) {
+                if (error.response && [404, 401].includes(error.response.status)) {
+                    return; // Do not retry 404 or 401 errors
+                }
+
+                if (attempt < retries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1))); // Exponential backoff
+                } else {
+                    return;
+                }
+            }
+        }
+    }
+
+    async saveUser(sub) {
         try {
-            const response = await this.client.post(`promptflow/post/saveUser/${sub}`);
+            const response = await this.client.post(`/promptflow/post/SaveUser/${sub}`);
             if (response.status === 200) {
                 return response.data;
             } else {
@@ -56,73 +74,17 @@ class ApiClient {
         }
     }
 
-    // Helper method to retry a request
-    async retryRequest(fn, retries = 3) {
-        for (let attempt = 0; attempt < retries; attempt++) {
-            try {
-                return await fn();
-            } catch (error) {
-                if (error.response && error.response.status === 409) {
-                    // Concurrency error, retry
-                    console.warn(`Concurrency error detected. Retrying attempt ${attempt + 1} of ${retries}.`);
-                    // Optionally introduce a small delay before retrying
-                    await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1))); // Exponential backoff
-                } else {
-                    // Other error, do not retry
-                    throw new Error("Something went wrong.");;
-                }
-            }
-        }
-        throw new Error("Maximum retries reached after concurrency errors.");
-    }
-
-    async createPortalSession(sub) {
+    async getStreamKey(username) {
         try {
-            const response = await this.client.post(`/webhook/create-portal-session/${sub}`);
+            const response = await this.client.get(`/promptflow/get/newBearerKey/${username}`);
             if (response.status === 200) {
-                if (response.data) return response.data;
+                return response.data;
             } else {
-                console.error('Failed to create portal session:', response.statusText);
-                return null;
+                return DefaultErrorMessage;
             }
         } catch (error) {
-            console.error('Error during creating portal session:', error.message);
-            return null;
+            return DefaultErrorMessage;
         }
-    }
-
-    async createCheckoutSession(sub) {
-        try {
-            const response = await this.client.post(`/webhook/create-checkout-session/${sub}`);
-            if (response.status === 200) {
-                return response.data.sessionId;
-            } else {
-                console.error('Failed to create checkout session:', response.statusText);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error during creating checkout session:', error.message);
-            return null;
-        }
-    }
-
-    async redirectToStripeCheckout(sub, sessionId = null) {
-        const stripe = await stripePromise;
-
-        if (!sessionId) sessionId = await this.createCheckoutSession(sub);
-
-        if (sessionId) {
-            const { error } = await stripe.redirectToCheckout({ sessionId });
-            if (error) {
-                console.error('Stripe checkout redirection error:', error);
-            }
-        } else {
-            console.error('Failed to create Stripe checkout session.');
-        }
-    }
-
-    appendCheckoutLink(message) {
-        return `${message} Please <a href="#" id="stripe-checkout-link">click here</a> to proceed to the Stripe Checkout.`;
     }
 
     async getNewAPIKey(username) {
@@ -138,21 +100,49 @@ class ApiClient {
         }
     }
 
-    async getSQLData(username) {
+    async upsertProfileData(body) {
         try {
-            const response = await this.client.get('/promptflow/get/sqlData/' + username);
+            const response = await this.client.post('/promptflow/post/profile/', body);
             if (response.status === 200) {
                 return response.data;
             } else {
                 return DefaultErrorMessage;
             }
         } catch (error) {
-            if (error.status === 404) return "Enter SQL table Schema(s) here to help the model with context.";
+            if (error.status === 404) return;
+            return DefaultErrorMessage;
+        }
+    }
+    
+    async getProfileData() {
+        try {
+            const response = await this.client.get('/promptflow/get/profile/' + profileName);
+            if (response.status === 200) {
+                return response.data;
+            } else {
+                return DefaultErrorMessage;
+            }
+        } catch (error) {
+            if (error.status === 404) return;
             return DefaultErrorMessage;
         }
     }
 
-    async saveSQLData(username, sqlDefinitionsString) {
+    async getUserData(username) {
+        try {
+            const response = await this.client.get('/promptflow/get/UserData/' + username);
+            if (response.status === 200) {
+                return response.data;
+            } else {
+                return DefaultErrorMessage;
+            }
+        } catch (error) {
+            if (error.status === 404) return;
+            return DefaultErrorMessage;
+        }
+    }
+
+    async saveUserData(username, sqlDefinitionsString) {
         try {
             const body = {
                 Username: username,
@@ -170,58 +160,44 @@ class ApiClient {
         }
     }
 
-    async requestSQLDataHelp(username, assistanceQuery, tableDefinitions) {
+    async createPortalSession(sub) {
         try {
-            const body = {
-                Username: username,
-                Query: assistanceQuery,
-                SqlData: tableDefinitions
-            };
-
-            const makeRequest = async () => {
-                const response = await this.client.post('/promptflow/post/sqlHelp', body);
-                if (response.status === 200) {
-                    return response.data;
-                } else {
-                    return DefaultErrorMessage;
-                }
-            };
-
-            return await this.retryRequest(makeRequest);
-        } catch (error) {
-            if (error.response && error.response.status === 429) {
-                return this.appendCheckoutLink(error.response.data || DefaultErrorMessage);
+            const response = await this.client.post(`/webhook/create-portal-session/${sub}`);
+            if (response.status === 200) {
+                if (response.data) return response.data;
+            } else {
+                return null;
             }
-            return DefaultErrorMessage;
+        } catch (error) {
+            return null;
         }
     }
 
-    async requestSQLConversion(username, messages, tableDefinitions) {
+    async createCheckoutSession(sub) {
         try {
-            if (tableDefinitions === null || tableDefinitions.trim() === "") return NullTableErrorMessage;
-
-            const body = {
-                Username: username,
-                Messages: messages,
-                SqlData: tableDefinitions
-            };
-
-            const makeRequest = async () => {
-                try {
-                    const response = await this.client.post('/promptflow/post/convertQuery', body);
-                    return response.data; // If 200, we get here
-                } catch (error) {
-                    if (error.response && error.response.status === 429) {
-                        return this.appendCheckoutLink(TooManyRequestsMessage);
-                    }
-                    return DefaultErrorMessage;
-                }
-            };
-
-            return await this.retryRequest(makeRequest);
+            const response = await this.client.post(`/webhook/create-checkout-session/${sub}`);
+            if (response.status === 200) {
+                return response.data.sessionId;
+            } else {
+                return null;
+            }
         } catch (error) {
-            return DefaultErrorMessage;
+            return null;
         }
+    }
+
+    async redirectToStripeCheckout(sub, sessionId = null) {
+        const stripe = await stripePromise;
+
+        if (!sessionId) sessionId = await this.createCheckoutSession(sub);
+
+        if (sessionId) {
+            await stripe.redirectToCheckout({ sessionId });
+        }
+    }
+
+    appendCheckoutLink(message) {
+        return `${message} Please <a href="#" id="stripe-checkout-link">click here</a> to proceed to the Stripe Checkout.`;
     }
 }
 

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import SplitPane from 'react-split-pane';
 import { useAuth0 } from '@auth0/auth0-react';
-import { debounce } from 'lodash';
 import ChatWindow from './ChatWindow';
 import ContentWindow from './ContentWindow';
 import FooterSection from './FooterSection';
@@ -10,18 +8,11 @@ import { NavMenu } from './NavMenu';
 import './WindowWrapper.css';
 import authConfig from '../auth_config.json';
 
-// Initialize Stripe with your publishable key
-const InnapropriateRequestErrorMessage = "Your last message was flagged as unrelated to SQL. Please check your input.";
-
 const WindowWrapper = () => {
     const { isAuthenticated, getAccessTokenSilently, user } = useAuth0();
     const [state, setState] = useState({
         tableDefinitions: '',
-        size: window.innerWidth < 1200 ? '50%' : '50%',
         isSmallViewport: window.innerWidth < 1200,
-        split: window.innerWidth < 1200 ? 'horizontal' : 'vertical',
-        minSize: 0,
-        maxSize: 0,
         stage: 0,
         conversationId: '',
         gameStartMessage: '',
@@ -31,7 +22,7 @@ const WindowWrapper = () => {
     });
 
     // Initialize API client
-    
+
 
     // Load messages from localStorage on mount
     useEffect(() => {
@@ -62,17 +53,17 @@ const WindowWrapper = () => {
                         accessToken: token,
                     }));
                 } catch (error) {
-                    console.error("Error fetching access token");
+                    
                 }
 
                 try {
-                    const sqlData = await apiClient.getSQLData(user.sub);
+                    const sqlData = await apiClient.getProfile(user.sub);
                     setState((prevState) => ({
                         ...prevState,
                         tableDefinitions: sqlData,
                     }));
                 } catch (error) {
-                    console.error('Error fetching SQL data:', error.message);
+                    
                 }
             }
         };
@@ -97,7 +88,6 @@ const WindowWrapper = () => {
 
     const requestSQLConversion = async (inputMessage) => {
         if (!user || !user.sub) {
-            console.error('User is not authenticated or sub ID is missing');
             return;
         }
 
@@ -116,83 +106,20 @@ const WindowWrapper = () => {
         }));
 
         try {
-            if (state.tableDefinitions === null
-                || state.tableDefinitions === ""
-                || state.tableDefinitions === "null"
-                || state.tableDefinitions === "Enter SQL table Schema(s) here to help the model with context.") {
+            const response = await apiClient.requestSQLConversion(userId, updatedMessages, state.tableDefinitions);
+
+            if (response) {
                 const responseMessage = {
                     role: 'Assistant',
-                    content: "Please be sure to set valid data in the SQL schema input to the left.",
+                    content: response,
                 };
                 setState((prevState) => ({
                     ...prevState,
                     messages: [...prevState.messages, responseMessage],
                 }));
             }
-            else {
-                const response = await apiClient.requestSQLConversion(userId, updatedMessages, state.tableDefinitions);
-
-                if (response) {
-                    const responseMessage = {
-                        role: 'Assistant',
-                        content: response,
-                    };
-                    setState((prevState) => ({
-                        ...prevState,
-                        messages: [...prevState.messages, responseMessage],
-                    }));
-                }
-            }
         } catch (error) {
-            console.error('Error during SQL conversion request:', error.message);
-        }
-    };
-
-    const handleAssistantSend = async (assistantInput) => {
-        if (!user || !user.sub) {
-            console.error('User is not authenticated or sub ID is missing');
-            return;
-        }
-
-        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
-        const userId = user.sub;
-
-        try {
-            const response = await apiClient.requestSQLDataHelp(userId, assistantInput, state.tableDefinitions);
-
-            if (response.inappropriate) {
-                const errorMessage = {
-                    role: 'Assistant',
-                    content: InnapropriateRequestErrorMessage,
-                };
-                setState((prevState) => ({
-                    ...prevState,
-                    messages: [...prevState.messages, errorMessage],
-                }));
-            } else {
-                setState((prevState) => ({
-                    ...prevState,
-                    tableDefinitions: response.response,
-                }));
-            }
-        } catch (error) {
-            console.error('Error during SQL data help request:', error.message);
-        }
-    };
-
-    const handleSave = async (tableDefinitions) => {
-        if (!user || !user.sub) {
-            console.error('User is not authenticated or sub ID is missing');
-            return;
-        }
-
-        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
-        const userId = user.sub;
-
-        try {
-            await apiClient.saveSQLData(userId, tableDefinitions);
-        } catch (error) {
-            console.error('Error saving SQL data:', error.message);
+            
         }
     };
 
@@ -208,39 +135,13 @@ const WindowWrapper = () => {
     return (
         <div className="window-wrapper-container">
             <NavMenu />
-            <SplitPane
-                style={{ position: 'relative', width: '100%', height: '100%' }}
-                split={state.split}
-                minSize={state.minSize}
-                maxSize={state.maxSize}
-                size={state.size}
-                primary="second"
-                onDragFinished={debounce(
-                    (newSize) =>
-                        setState((prevState) => ({
-                            ...prevState,
-                            size: newSize,
-                        })),
-                    50
-                )}
-            >
+            <div className="fixed-pane-container">
                 <div className="pane">
-                    <ContentWindow
-                        tableDefinitions={state.tableDefinitions}
-                        onAssistantSend={handleAssistantSend}
-                        onSave={handleSave}
-                    />
+                    <ContentWindow/>
                 </div>
                 <div className="pane">
-                    <label className="chatwindow-label">SQL Query Converter</label>
+                    <label className="chatwindow-label">Chat Window</label>
                     <ChatWindow
-                        toggleSplit={() =>
-                            setState((prevState) => ({
-                                ...prevState,
-                                split: prevState.split === 'vertical' ? 'horizontal' : 'vertical',
-                                size: '50%',
-                            }))
-                        }
                         isSmallViewport={state.isSmallViewport}
                         messages={state.messages}
                         sendMessage={(inputMessage) => {
@@ -248,13 +149,11 @@ const WindowWrapper = () => {
                         }}
                         clearMessages={clearMessages}
                     />
-                    <div ref={React.createRef()} />
                 </div>
-            </SplitPane>
+            </div>
             <FooterSection />
         </div>
     );
 };
 
 export default WindowWrapper;
-

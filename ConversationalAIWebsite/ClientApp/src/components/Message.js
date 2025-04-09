@@ -8,9 +8,9 @@ export class Message extends Component {
 
     render() {
         const { author, content, timestamp, alignRight } = this.props;
-        const alignmentClass = alignRight ? 'align-right' : 'align-left';
+        const alignmentClass = alignRight ? 'align-left' : 'align-right';
         const messageStyle = {
-            backgroundColor: alignRight ? '#ebebeb' : '#007bff'
+            backgroundColor: alignRight ? '#ebebeb' : '#007bff' 
         };
 
         return (

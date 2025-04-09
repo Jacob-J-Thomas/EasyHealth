@@ -39,7 +39,7 @@ namespace ConversationalAIWebsite.Controllers
             _domain = settings.Domain;
         }
 
-        [Authorize(Policy = "Auth0Policy")]
+        [Authorize(Policy = Policies.Auth0Policy)]
         [HttpPost("create-checkout-session/{username}")]
         public IActionResult CreateCheckoutSession([FromRoute] string username)
         {
@@ -71,7 +71,7 @@ namespace ConversationalAIWebsite.Controllers
             }
         }
 
-        [Authorize(Policy = "Auth0Policy")]
+        [Authorize(Policy = Policies.Auth0Policy)]
         [HttpPost("create-portal-session/{username}")]
         public async Task<IActionResult> CreatePortalSession([FromRoute] string username)
         {
@@ -80,7 +80,7 @@ namespace ConversationalAIWebsite.Controllers
                 if (string.IsNullOrEmpty(username)) return BadRequest("The customer ID is required.");
 
                 // if user has no subscription data, redirect to checkout
-                var customer = await _promptFlowLogic.GetUser(username);
+                var customer = await _promptFlowLogic.GetUserData(username);
                 if (customer.Data == null || !customer.Data.IsPayingCustomer) return CreateCheckoutSession(username);
 
                 StripeConfiguration.ApiKey = _stripeKey;

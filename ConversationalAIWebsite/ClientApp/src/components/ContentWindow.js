@@ -1,61 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import ApiClient from '../api/ApiClient';
 import './ContentWindow.css';
+import { useAuth0 } from '@auth0/auth0-react';
+import authConfig from '../auth_config.json';
 
-function ContentWindow({ tableDefinitions, onAssistantSend, onSave }) {
-    const [localTableDefinitions, setLocalTableDefinitions] = useState('');
-    const [assistantInput, setAssistantInput] = useState('');
-
+function ContentWindow() {
+    const [profileData, setProfileData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const { getAccessTokenSilently } = useAuth0();
+    
     useEffect(() => {
-        setLocalTableDefinitions(tableDefinitions);
-    }, [tableDefinitions]);
+        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
+        async function fetchProfileData() {
+            const data = await apiClient.getProfileData('test');
+            if (data === "Something went wrong...") {
+                const profile = {
+                    Name: 'test',
+                    Model: 'gpt-4o',
+                    Host: 'Azure'
+                };
+                await apiClient.upsertProfileData(profile);
+                setProfileData(profile);
+            } else {
+                setProfileData(data);
+            }
+            setLoading(false);
+        }
+        fetchProfileData();
+    }, [getAccessTokenSilently]);
 
-    const handleInputChange = (event) => {
-        const value = event.target.value;
-        setLocalTableDefinitions(value);
-    };
-
-    const handleAssistantInputChange = (event) => {
-        const value = event.target.value;
-        setAssistantInput(value);
-    };
-
-    const handleSend = () => {
-        onAssistantSend(assistantInput);
-        setAssistantInput('');
-    };
-
-    const handleSave = () => {
-        onSave(localTableDefinitions);
-    };
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="component-container">
-            <div className="pane">
-                <label className="table-definitions-label">SQL Table Schema(s)</label>
-                <textarea
-                    className="table-definitions-input"
-                    value={localTableDefinitions}
-                    onChange={handleInputChange}
-                    rows="10"
-                    cols="50"
-                />
-                <div className="table-definitions-toolbar">
-                    <div className="assistant-container">
-                        <label className="assistant-label">
-                            SQL Table Construction Assistant
-                        </label>
-                        <input
-                            className="assistant-input"
-                            type="text"
-                            placeholder="Describe your table(s) here to generate a template, or get help modifying an existing one..."
-                            value={assistantInput}
-                            onChange={handleAssistantInputChange}
-                        />
-                    </div>
-                    <button className="toolbar-button" onClick={handleSend}>Send</button>
-                    <button className="toolbar-button" onClick={handleSave}>Save</button>
-                </div>
-            </div>
+            <label className="table-definitions-label">Content Tab</label>
+            <textarea
+                className="table-definitions-input"
+                rows="10"
+                cols="50"
+                value={JSON.stringify(profileData, null, 2)}
+                readOnly
+            />
         </div>
     );
 }

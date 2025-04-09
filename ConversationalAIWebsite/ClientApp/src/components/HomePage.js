@@ -22,10 +22,10 @@ function HomePage() {
             <NavMenu />
             <header className="hero-section">
                 <div className="hero-content">
-                    <h1>Empower Your Data with NLSequel</h1>
+                    <h1>Subtitle Goes Here</h1>
                     <p>
-                        Transform natural language into secure SQL queries in seconds. Enjoy a free-to-use API
-                        that never directly connects to your database—ensuring safety, transparency, and peace of mind.
+                        We can place a small little blurb here giving some additional data about the product, how it can be used, and 
+                        more data that's useful. Really sell the tool, product or service.
                     </p>
                     <button className="signup-button" onClick={handleSignUp}>
                         Sign Up Now
@@ -53,28 +53,28 @@ function HomePage() {
                                 <td>$0.00</td>
                             </tr>
                             <tr>
-                                <td>Pay-as-You-Go</td>
-                                <td>20 free/day + Unlimited extra</td>
+                                <td>Paid Tier</td>
+                                <td>Paid requests amount number</td>
                                 <td>✔️</td>
-                                <td>$0.02</td>
+                                <td>$200</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div className="features">
-                    <h2>Why NLSequel?</h2>
+                    <h2>Why Should You Use This Project?</h2>
                     <ul>
                         <li>
-                            <strong>Secure:</strong> No direct database connections mean your data is safe.
+                            <strong>Reason 1:</strong> This is the first reason.
                         </li>
                         <li>
-                            <strong>Efficient:</strong> Get SQL queries from natural language in seconds.
+                            <strong>Reason 2:</strong> This is the second reason.
                         </li>
                         <li>
-                            <strong>Flexible:</strong> Use our API or UI at the same transparent pricing.
+                            <strong>Reason 3:</strong> This is the third reason.
                         </li>
                         <li>
-                            <strong>Transparent:</strong> Only pay for what you use.
+                            <strong>Reason 4:</strong> This is the fourth reason.
                         </li>
                     </ul>
                 </div>

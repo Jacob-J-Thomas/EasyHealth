@@ -21,8 +21,7 @@ const GenerateApiKey = () => {
             setApiKey(newApiKey);
             setError('');
         } catch (err) {
-            setError('Error generating new API key');
-            console.error('Error generating new API key:', err);
+
         }
     };
 
@@ -34,12 +33,12 @@ const GenerateApiKey = () => {
             >
                 Generate API Key
             </button>
-            {apiKey && <p className="api-key-text">{apiKey}</p>}
-            {error && <p className="error">{error}</p>}
+            <div className="api-key-output-container">
+                {apiKey && <p className="api-key-text">{apiKey}</p>}
+                {error && <p className="error">{error}</p>}
+            </div>
         </div>
     );
 };
 
 export default GenerateApiKey;
-
-

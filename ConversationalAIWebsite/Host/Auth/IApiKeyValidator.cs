@@ -4,7 +4,7 @@ namespace ConversationalAIWebsite.Host.Auth
 {
     public interface IApiKeyValidator
     {
-        Task<UserData?> ValidateApiKeyAsync(string encryptedApiKey);
+        Task<Users?> ValidateApiKeyAsync(string encryptedApiKey);
         string HashApiKey(string apiKey);
     }
 }

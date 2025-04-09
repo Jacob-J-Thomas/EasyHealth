@@ -12,9 +12,9 @@ const PostLoginInitializer = () => {
                 const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
                 try {
                     // Call your backend endpoint to save the user data
-                    await apiClient.saveUserData(user.sub);
+                    await apiClient.saveUser(user.sub);
                 } catch (error) {
-                    console.error('Failed to save user data:', error);
+                    
                 }
             }
         };

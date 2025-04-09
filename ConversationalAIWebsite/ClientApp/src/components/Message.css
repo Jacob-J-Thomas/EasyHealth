@@ -6,18 +6,22 @@
 }
 
     .message-container.align-left {
-        margin-left: auto;
-        /* Add any additional styles for left alignment */
+        margin-right: auto;
+        color: #e0e0e0;
     }
 
         .message-container.align-left .message {
-            color: #e0e0e0;  /*Ensure text color for left-aligned messages */
+            color: #0f0f0f;
         }
 
     .message-container.align-right {
-        margin-right: auto;
-        color: #1a1a1a;
-        /* Add any additional styles for right alignment */
+        margin-left: auto;
+        color: #e0e0e0;
+    }
+
+    .message-container.align-right .message {
+        margin-left: auto;
+        margin-right: 0;
     }
 
 .message {
@@ -29,10 +33,18 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
-    max-width: 100%;
+    max-width: fit-content;
     box-sizing: border-box;
     background-color: #0f0f0f; /* Dark blue background for messages */
 }
+
+    .message p {
+        max-width: fit-content;
+    }
+
+    .message-body {
+        max-width: fit-content;
+    }
 
 .time-stamp {
     margin-top: -1rem;
@@ -43,11 +55,11 @@
 }
 
     .time-stamp.align-right {
-        text-align: left;
+        text-align: right;
     }
 
     .time-stamp.align-left {
-        text-align: right;
+        text-align: left;
     }
 
 .author {
@@ -56,11 +68,11 @@
 }
 
     .author.align-left {
-        text-align: right;
+        text-align: left;
     }
 
     .author.align-right {
-        text-align: left;
+        text-align: right;
     }
 
 pre {
@@ -72,7 +84,6 @@ pre {
 
 .message ol,
 .message ul {
-    padding-left: 1.5rem; /* Add padding to lists for better readability */
     margin: 0; /* Remove default margin */
     color: white;
 }

@@ -3,6 +3,7 @@ using ConversationalAIWebsite.Client.IntelligenceHub;
 using ConversationalAIWebsite.DAL;
 using ConversationalAIWebsite.DAL.Models;
 using ConversationalAIWebsite.Host.Config;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using System.Security.Cryptography;
@@ -12,21 +13,16 @@ namespace ConversationalAIWebsite.Business
 {
     public class PromptFlowLogic : IPromptFlowLogic
     {
+        private readonly IAIAuthClient _authClient;
         private readonly IAIClientWrapper _aiClient;
         private readonly AppDbContext _dbContext;
-
-        // Maximum number of requests allowed per day for non-paying users
-        private const int _maxRequestsPerDay = 20;
-
-        private const string _sqlDataConstructionProfile = "NLSequelDataConstructionHelper";
-        private const string _sqlConversionProfile = "NLSequelConverter";
-        private const string _sqlValidationProfile = "SqlValidator";
 
         private readonly string _meterName;
         private readonly string _stripeKey;
 
-        public PromptFlowLogic(IAIClientWrapper aiClient, AppDbContext context, StripeSettings settings)
+        public PromptFlowLogic(IAIClientWrapper aiClient, IAIAuthClient authClient, AppDbContext context, StripeSettings settings)
         {
+            _authClient = authClient;
             _aiClient = aiClient;
             _dbContext = context;
 
@@ -34,20 +30,48 @@ namespace ConversationalAIWebsite.Business
             _stripeKey = settings.SecretKey;
         }
 
-        public async Task<BackendResponse<UserData?>> GetUser(string username)
+        public async Task<BackendResponse<Profile?>> GetProfile(string profile)
         {
             try
             {
-                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
-                if (user == null)
-                {
-                    return BackendResponse<UserData?>.CreateFailureResponse("User not found.", System.Net.HttpStatusCode.NotFound);
-                }
-                return BackendResponse<UserData?>.CreateSuccessResponse(user, "User profile retrieved successfully.");
+                var profileData = await _aiClient.GetProfileAsync(profile);
+                if (profileData != null) return BackendResponse<Profile?>.CreateSuccessResponse(profileData);
+                return BackendResponse<Profile?>.CreateFailureResponse("Failed to retrieve profile", System.Net.HttpStatusCode.NotFound);
             }
             catch (Exception)
             {
-                return BackendResponse<UserData?>.CreateFailureResponse($"Error retrieving user.");
+                return BackendResponse<Profile?>.CreateFailureResponse($"Error retrieving the profile.");
+            }
+        }
+
+        public async Task<BackendResponse<Profile?>> UpsertProfile(Profile profile)
+        {
+            try
+            {
+                var profileData = await _aiClient.UpsertProfileAsync(profile);
+                if (profileData != null) return BackendResponse<Profile?>.CreateSuccessResponse(profileData);
+                return BackendResponse<Profile?>.CreateFailureResponse("Error updating the profile.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<Profile?>.CreateFailureResponse($"Error updating the profile.");
+            }
+        }
+
+        public async Task<BackendResponse<Users?>> GetUserData(string username)
+        {
+            try
+            {
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null)
+                {
+                    return BackendResponse<Users?>.CreateFailureResponse("User not found.", System.Net.HttpStatusCode.NotFound);
+                }
+                return BackendResponse<Users?>.CreateSuccessResponse(user, "User profile retrieved successfully.");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<Users?>.CreateFailureResponse($"Error retrieving user.");
             }
         }
 
@@ -55,11 +79,11 @@ namespace ConversationalAIWebsite.Business
         {
             try
             {
-                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
                 if (user == null) return BackendResponse<bool>.CreateFailureResponse("User not found.");
                 user.IsPayingCustomer = true;
                 user.StripeCustomerId = customerId;
-                _dbContext.UserData.Update(user);
+                _dbContext.Users.Update(user);
                 await _dbContext.SaveChangesAsync();
                 return BackendResponse<bool>.CreateSuccessResponse(true, "User updated to paying status.");
             }
@@ -73,10 +97,10 @@ namespace ConversationalAIWebsite.Business
         {
             try
             {
-                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.StripeCustomerId == customerId);
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.StripeCustomerId == customerId);
                 if (user == null) return BackendResponse<bool>.CreateFailureResponse("User not found.");
                 user.IsPayingCustomer = false;
-                _dbContext.UserData.Update(user);
+                _dbContext.Users.Update(user);
                 await _dbContext.SaveChangesAsync();
                 return BackendResponse<bool>.CreateSuccessResponse(true, "User updated to non-paying status.");
             }
@@ -90,13 +114,13 @@ namespace ConversationalAIWebsite.Business
         {
             try
             {
-                var existingUser = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == sub);
+                var existingUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == sub);
                 if (existingUser != null)
                 {
                     return BackendResponse<bool>.CreateSuccessResponse(true);
                 }
 
-                var newUser = new UserData
+                var newUser = new Users
                 {
                     Username = sub,
                     IsPayingCustomer = false,
@@ -105,7 +129,7 @@ namespace ConversationalAIWebsite.Business
                     RowVersion = new byte[0]
                 };
 
-                await _dbContext.UserData.AddAsync(newUser);
+                await _dbContext.Users.AddAsync(newUser);
                 await _dbContext.SaveChangesAsync();
 
                 return BackendResponse<bool>.CreateSuccessResponse(true, "User saved successfully.");
@@ -116,212 +140,29 @@ namespace ConversationalAIWebsite.Business
             }
         }
 
-        public async Task<BackendResponse<bool>> UpsertUserSQLData(FrontEndRequest request)
+        public async Task<BackendResponse<bool>> UpsertUserData(PublicApiRequest request, string apiKey)
         {
             try
             {
-                var existingUser = _dbContext.UserData.FirstOrDefault(user => user.Username == request.Username);
-
-                // Add or update existing user data
-                if (existingUser != null)
+                var encryptedApiKey = HashApiKey(apiKey);
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.EncryptedApiKey == encryptedApiKey);
+                if (user == null || user.ApiKeyGeneratedDate < DateTime.UtcNow.AddMonths(-6))
                 {
-                    existingUser.UserSQLData = request.SqlData;
-                    _dbContext.UserData.Update(existingUser);
-                }
-                else
-                {
-                    var newUser = new UserData { Username = request.Username, UserSQLData = request.SqlData };
-                    await _dbContext.UserData.AddAsync(newUser);
+                    return BackendResponse<bool>.CreateFailureResponse("Invalid or expired API key.");
                 }
 
-                // Save changes and return success response
+                var lastMessage = request.Messages.LastOrDefault();
+                user.ExampleDataField = $"Latest message = {lastMessage?.User}: {lastMessage?.Content}";
+
+                _dbContext.Users.Update(user);
                 var changes = await _dbContext.SaveChangesAsync();
-                if (changes > 0) return BackendResponse<bool>.CreateSuccessResponse(true, "User data updated successfully.");
-                else return BackendResponse<bool>.CreateFailureResponse("No changes were made to the database.");
+                return changes > 0
+                    ? BackendResponse<bool>.CreateSuccessResponse(true, "User data updated successfully.")
+                    : BackendResponse<bool>.CreateFailureResponse("No changes were made to the database.");
             }
             catch (Exception)
             {
-                return BackendResponse<bool>.CreateFailureResponse($"An error occurred when updating user data.");
-            }
-        }
-
-        public BackendResponse<string?> GetSQLData(string username)
-        {
-            try
-            {
-               var result = _dbContext.UserData.FirstOrDefault(user => user.Username == username);
-                if (result != null && !string.IsNullOrEmpty(result.UserSQLData)) return BackendResponse<string?>.CreateSuccessResponse(result.UserSQLData);
-                else return BackendResponse<string?>.CreateFailureResponse("No SQL data found for the given user.", System.Net.HttpStatusCode.NotFound);
-            }
-            catch (Exception)
-            {
-                return BackendResponse<string?>.CreateFailureResponse($"An error occurred when retrieving SQL data.");
-            }
-        }
-
-        public async Task<BackendResponse<string?>> GetSQLDataHelp(FrontEndRequest request)
-        {
-            try
-            {
-                using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
-                var userData = await _dbContext.UserData
-                    .Where(user => user.Username == request.Username)
-                    .FirstOrDefaultAsync();
-
-                if (userData == null)
-                {
-                    return BackendResponse<string?>.CreateFailureResponse("User data not found.");
-                }
-
-                var today = DateTime.UtcNow.Date;
-                if (userData.LastRequestDate != today)
-                {
-                    userData.RequestCount = 1;
-                    userData.LastRequestDate = today;
-                }
-                else
-                {
-                    userData.RequestCount++;
-                }
-
-                if (!userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
-                {
-                    return BackendResponse<string?>.CreateFailureResponse(
-                        "You have reached the maximum number of requests allowed per day.",
-                        System.Net.HttpStatusCode.TooManyRequests);
-                }
-
-                await _dbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                if (userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
-                {
-                    RecordUsageWithStripe(userData.StripeCustomerId, 1);
-                }
-
-                var completionContent = $"{request.Query}. For context, I provided my current table definitions below:\n\n{userData.UserSQLData}";
-
-                var completionRequest = new CompletionRequest
-                {
-                    ProfileOptions = new Profile { Name = _sqlDataConstructionProfile },
-                    Messages = new List<Message>
-                    {
-                        new Message
-                        {
-                            Content = completionContent,
-                            Role = Role.User,
-                            TimeStamp = DateTime.UtcNow
-                        }
-                    }
-                };
-
-                var completionResponse = await _aiClient.ChatAsync(completionRequest);
-                var responseContent = completionResponse.Messages?.LastOrDefault()?.Content;
-
-                if (!string.IsNullOrEmpty(responseContent))
-                {
-                    return BackendResponse<string?>.CreateSuccessResponse(responseContent);
-                }
-                else
-                {
-                    return BackendResponse<string?>.CreateFailureResponse("No response received from the AI client.");
-                }
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return BackendResponse<string?>.CreateFailureResponse("A concurrency error occurred. Please retry the request.");
-            }
-            catch (Exception)
-            {
-                return BackendResponse<string?>.CreateFailureResponse($"An error occurred.");
-            }
-        }
-
-        public async Task<BackendResponse<string?>> ConvertQueryToSQL(FrontEndRequest request)
-        {
-            try
-            {
-                using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
-                var userData = await _dbContext.UserData
-                    .Where(user => user.Username == request.Username)
-                    .FirstOrDefaultAsync();
-
-                if (userData == null)
-                {
-                    return BackendResponse<string?>.CreateFailureResponse("User data not found.");
-                }
-
-                var today = DateTime.UtcNow.Date;
-                if (userData.LastRequestDate != today)
-                {
-                    userData.RequestCount = 1;
-                    userData.LastRequestDate = today;
-                }
-                else
-                {
-                    userData.RequestCount++;
-                }
-
-                if (!userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
-                {
-                    return BackendResponse<string?>.CreateFailureResponse(
-                        "You have reached the maximum number of requests allowed per day.",
-                        System.Net.HttpStatusCode.TooManyRequests);
-                }
-
-                await _dbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                if (userData.IsPayingCustomer && userData.RequestCount > _maxRequestsPerDay)
-                {
-                    RecordUsageWithStripe(userData.StripeCustomerId, 1);
-                }
-
-                var completionContent = $"\n\nThe current time in UTC is {DateTime.UtcNow}. For context, I provided my current table definitions below:\n\n{userData.UserSQLData}";
-                if (request.Messages.Any(x => x.Role == Role.User))
-                {
-                    request.Messages.Last(x => x.Role == Role.User).Content += completionContent;
-                }
-                else
-                {
-                    return BackendResponse<string?>.CreateFailureResponse("No user message found in the conversation.");
-                }
-
-                var completionRequest = new CompletionRequest
-                {
-                    ProfileOptions = new Profile { Name = _sqlConversionProfile },
-                    Messages = request.Messages
-                };
-
-                var completionResponse = await _aiClient.ChatAsync(completionRequest);
-                var responseContent = completionResponse.Messages?.LastOrDefault()?.Content;
-
-                var validationRequest = new CompletionRequest()
-                {
-                    ProfileOptions = new Profile() { Name = _sqlValidationProfile },
-                    Messages = new List<Message>() { new Message() { Content = responseContent, Role = Role.User } }
-                };
-                var validationResponse = await _aiClient.ChatAsync(validationRequest);
-                var cleanedResponseContent = validationRequest.Messages?.LastOrDefault()?.Content;
-
-                if (!string.IsNullOrEmpty(cleanedResponseContent))
-                {
-                    return BackendResponse<string?>.CreateSuccessResponse(cleanedResponseContent);
-                }
-                else
-                {
-                    return BackendResponse<string?>.CreateFailureResponse("No response received from the AI client.");
-                }
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return BackendResponse<string?>.CreateFailureResponse("A concurrency error occurred. Please retry the request.");
-            }
-            catch (Exception)
-            {
-                return BackendResponse<string?>.CreateFailureResponse($"An error occurred.");
+                return BackendResponse<bool>.CreateFailureResponse("An error occurred when updating user data.");
             }
         }
 
@@ -346,7 +187,7 @@ namespace ConversationalAIWebsite.Business
         {
             try
             {
-                var user = await _dbContext.UserData.FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
                 if (user == null)
                 {
                     return BackendResponse<string>.CreateFailureResponse("User not found.", System.Net.HttpStatusCode.NotFound);
@@ -362,7 +203,7 @@ namespace ConversationalAIWebsite.Business
                 user.EncryptedApiKey = encryptedApiKey;
                 user.ApiKeyGeneratedDate = DateTime.UtcNow;
 
-                _dbContext.UserData.Update(user);
+                _dbContext.Users.Update(user);
                 await _dbContext.SaveChangesAsync();
 
                 return BackendResponse<string>.CreateSuccessResponse(apiKey, "API key generated and stored successfully.");
@@ -385,6 +226,20 @@ namespace ConversationalAIWebsite.Business
             {
                 var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(apiKey));
                 return Convert.ToBase64String(hashedBytes);
+            }
+        }
+
+        public async Task<BackendResponse<string>> GetIntelligenceHubBearerKey(string username)
+        {
+            try
+            {
+                var response = await _authClient.RequestAuthToken();
+                if (!string.IsNullOrEmpty(response.AccessToken)) return BackendResponse<string>.CreateSuccessResponse(response.AccessToken);
+                return BackendResponse<string>.CreateFailureResponse("Failed to retrieve auth token");
+            }
+            catch (Exception)
+            {
+                return BackendResponse<string>.CreateFailureResponse("Something went wrong when getting the key.", statusCode: System.Net.HttpStatusCode.InternalServerError);
             }
         }
     }

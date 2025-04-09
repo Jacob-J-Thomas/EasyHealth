@@ -11,10 +11,10 @@ function ApiReference() {
             <div className="intro-bubble">
                 <h1>API Reference</h1>
                 <p>
-                    Welcome to the NLSequel API documentation. This API enables you to define, save, and retrieve your SQL schema, as well as convert natural language queries into SQL statements. All endpoints require a valid API key.
+                    Welcome to the API documentation. This API enables you to perform various operations. All endpoints require a valid API key.
                 </p>
                 <p>
-                    Use the "Generate API Key" option below to obtain your API key. Note that generating a new key will invalidate any previously generated key, and each key is valid for 6 months.
+                    Use the "Generate API Key" option below to obtain your API key. Note that generating a new key will invalidate any previously generated key, and each key is valid for a specified period.
                 </p>
                 <GenerateApiKey />
             </div>
@@ -22,7 +22,7 @@ function ApiReference() {
             <div className="section-bubble">
                 <h2>Usage</h2>
                 <p>
-                    The standard flow is simple: first, update your SQL data by saving or updating your schema using the provided endpoint; then, make a conversion request to transform your natural language query into a SQL statement.
+                    The standard flow is simple: first, perform the necessary setup using the provided endpoint; then, make a request to execute the desired operation.
                 </p>
             </div>
 
@@ -45,36 +45,17 @@ function ApiReference() {
                 <h2>Endpoints</h2>
 
                 <div className="api-endpoint">
-                    <h3>1. Save SQL Data</h3>
-                    <p><strong>Endpoint:</strong> <code>POST /api/post/sqlData</code></p>
-                    <p><strong>Description:</strong> Save or update your SQL schema and data. The schema is defined by a SQL script that creates two tables: one for user details (authentication, sign-in, and metadata) and one for sales (purchase details and metadata).</p>
-                    <p>NOTE: SQL schemas work the best with the API, but technically any data format is acceptable, as long as it accuratley describes the SQL table in a clear and easy to understand way.</p>
+                    <h3>1. Example Endpoint</h3>
+                    <p><strong>Endpoint:</strong> <code>POST /api/example</code></p>
+                    <p><strong>Description:</strong> This endpoint allows you to perform a specific operation. The request body should contain the necessary data in a specified format.</p>
                     <h4>Request:</h4>
                     <pre>
                         <code>
-                            {`POST /api/post/sqlData
+                            {`POST /api/example
 x-api-key: your-api-key
 Content-Type: application/json
 
-{
-    "SqlData": "CREATE TABLE Users (
-                Id INT PRIMARY KEY,
-                Username VARCHAR(50),
-                PasswordHash VARCHAR(255),
-                LastSignIn DATETIME,
-                Metadata JSON
-            );
-            
-            CREATE TABLE Sales (
-                SaleId INT PRIMARY KEY,
-                UserId INT,
-                Amount DECIMAL(10,2),
-                SaleDate DATETIME,
-                Metadata JSON,
-                FOREIGN KEY (UserId) 
-                REFERENCES Users(Id)
-            );"
-}`}
+[request body goes here]`}
                         </code>
                     </pre>
                     <h4>Response:</h4>
@@ -86,77 +67,22 @@ Content-Type: application/json
                 </div>
 
                 <div className="api-endpoint">
-                    <h3>2. Retrieve SQL Data</h3>
-                    <p><strong>Endpoint:</strong> <code>GET /api/get/sqlData</code></p>
-                    <p><strong>Description:</strong> Retrieve your saved SQL schema and data.</p>
+                    <h3>2. Another Example Endpoint</h3>
+                    <p><strong>Endpoint:</strong> <code>GET /api/another-example</code></p>
+                    <p><strong>Description:</strong> This endpoint allows you to retrieve specific data.</p>
                     <h4>Request:</h4>
                     <pre>
                         <code>
-                            {`GET /api/get/sqlData
+                            {`GET /api/another-example
 x-api-key: your-api-key`}
                         </code>
                     </pre>
                     <h4>Response:</h4>
                     <pre>
                         <code>
-                            {`{
-  "Success": true,
-  "Data": "CREATE TABLE Users (
-                Id INT PRIMARY KEY,
-                Username VARCHAR(50),
-                PasswordHash VARCHAR(255),
-                LastSignIn DATETIME,
-                Metadata JSON
-            );
-            
-            CREATE TABLE Sales (
-                SaleId INT PRIMARY KEY,
-                UserId INT,
-                Amount DECIMAL(10,2),
-                SaleDate DATETIME,
-                Metadata JSON,
-                FOREIGN KEY (UserId) 
-                REFERENCES Users(Id)
-            );"
-}`}
+                            {`[Response body goes here]`}
                         </code>
                     </pre>
-                </div>
-
-                <div className="api-endpoint">
-                    <h3>3. Convert Natural Language to SQL</h3>
-                    <p><strong>Endpoint:</strong> <code>POST /api/post/convertQuery</code></p>
-                    <p>
-                        <strong>Description:</strong> Convert a natural language query into a SQL query. This example converts a query into a JOIN statement that retrieves user and sales details for sales over $100.
-                    </p>
-                    <p>
-                        NOTE: The SQL data parameter can also be attached here, in which case this data will be used to inform the conversion rather than the existing data in the database.
-                    </p>
-                    <h4>Request:</h4>
-                    <pre>
-                        <code>
-                            {`POST /api/post/convertQuery
-x-api-key: your-api-key
-Content-Type: application/json
-
-{
-  "Query": "Retrieve the username, last sign-in, sale amount, and sale date for users who made purchases over $100"
-}`}
-                        </code>
-                    </pre>
-                    <h4>Response:</h4>
-                    <pre>
-                        <code>
-                            {`{
-  "Success": true,
-  "Data": "SELECT U.Username, U.LastSignIn, S.Amount, S.SaleDate FROM Users U JOIN Sales S ON U.Id = S.UserId WHERE S.Amount > 100;",
-  "RemainingFreeRequests": 4
-}`}
-                        </code>
-                    </pre>
-                    <p>
-                        If you exceed your daily request quota, you will receive a '429 Too Many Requests' response.
-                    </p>
                 </div>
             </div>
             <FooterSection />
@@ -165,4 +91,3 @@ Content-Type: application/json
 }
 
 export default ApiReference;
-

@@ -14,7 +14,7 @@ namespace ConversationalAIWebsite.Controllers
 
     [ApiController]
     [Route("[controller]")]
-    [Authorize(Policy = AuthPolicies.PayingUserAuthPolicy)] // uncomment to enforce basic auth
+    [Authorize(Policy = Policies.BasicAuthPolicy)]
     public class FunctionController : ControllerBase
     {
         private readonly IAuthLogic _authLogic;

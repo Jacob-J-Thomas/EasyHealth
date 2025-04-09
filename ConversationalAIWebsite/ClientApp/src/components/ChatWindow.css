@@ -75,10 +75,9 @@
     transition: background-color 0.3s;
 }
 
-.toolbar-button:hover {
-    background-color: #0056b3;
-}
-
+    .toolbar-button:hover {
+        background-color: #0056b3;
+    }
 
 .chat-input button {
     border: none;
@@ -90,6 +89,6 @@
     margin-right: 0.25em;
 }
 
-.chat-input button:hover {
-    background-color: #0056b3;
-}
+    .chat-input button:hover {
+        background-color: #0056b3;
+    }

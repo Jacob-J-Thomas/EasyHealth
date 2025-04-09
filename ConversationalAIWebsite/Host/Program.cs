@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Authorization;
 using ConversationalAIWebsite.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication;
+using Polly.Retry;
+using Polly.Extensions.Http;
+using Polly;
 
 namespace ConversationalAIWebsite.Host
 {
@@ -60,7 +64,15 @@ namespace ConversationalAIWebsite.Host
             builder.Services.AddSingleton(intelligenceHubSettings);
             builder.Services.AddSingleton(stripeSettings);
 
-            builder.Services.AddHttpClient();
+            // Define a retry policy
+            AsyncRetryPolicy<System.Net.Http.HttpResponseMessage> retryPolicy = HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+            // Register HttpClient with retry policy
+            builder.Services.AddHttpClient(Policies.RetryPolicy)
+                .AddPolicyHandler(retryPolicy);
+
             builder.Services.AddSingleton<AIAuthClient>();
             builder.Services.AddSingleton<IAIAuthClient, AIAuthClient>();
             builder.Services.AddSingleton<IAIClientWrapper, AIClientWrapper>();
@@ -78,19 +90,26 @@ namespace ConversationalAIWebsite.Host
                     {
                         NameClaimType = ClaimTypes.NameIdentifier,
                     };
-                });
+                })
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("Auth0Policy", policy =>
+                options.AddPolicy(Policies.Auth0Policy, policy =>
                 {
                     policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();
                 });
 
-                options.AddPolicy("ApiKeyPolicy", policy =>
+                options.AddPolicy(Policies.PublicApiPolicy, policy =>
                 {
                     policy.RequireAssertion(context => context.User.Identity != null && context.User.Identity.AuthenticationType == "ApiKey");
+                });
+
+                options.AddPolicy(Policies.BasicAuthPolicy, policy =>
+                {
+                    policy.AuthenticationSchemes.Add("BasicAuthentication");
+                    policy.RequireAuthenticatedUser();
                 });
             });
 
@@ -156,11 +175,22 @@ namespace ConversationalAIWebsite.Host
                 options.AddApplicationInsights();
             });
 
+            // Add CORS policy
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
 
             var app = builder.Build();
 
             // Enable CORS.
-            //app.UseCors("AllowSpecificOrigins");
+            app.UseCors("AllowAllOrigins");
 
             // Production settings.
             if (!app.Environment.IsDevelopment())
@@ -188,9 +218,7 @@ namespace ConversationalAIWebsite.Host
             });
 
             // Map controllers and default route.
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller}/{action=Index}/{id?}");
+            app.MapControllers();
 
             // Fallback route.
             app.MapFallbackToFile("index.html");

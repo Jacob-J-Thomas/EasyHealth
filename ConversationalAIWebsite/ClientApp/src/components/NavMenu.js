@@ -29,8 +29,8 @@ export class NavMenu extends Component {
                 <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom mb-3" container light>
                     <div className="navbar-content-container">
                         <div className="d-flex flex-column align-items-start">
-                            <NavbarBrand tag={Link} to="/api">NLSequel</NavbarBrand>
-                            <h3 className="navbar-subtitle">A Natural Language to SQL Conversion Tool</h3>
+                            <NavbarBrand tag={Link} to="/api">App Title</NavbarBrand>
+                            <h3 className="navbar-subtitle">The Application Subtitle Goes Here</h3>
                         </div>
                         <div className="nav-collapse-bottom">
                             <div className="logout-container">
@@ -41,7 +41,7 @@ export class NavMenu extends Component {
                                     <NavLink tag={Link} className={`text-dark ${pathname === '/' || pathname === '/home' ? 'active' : ''}`} to="/home">Home</NavLink>
                                 </NavItem>
                                 <NavItem>
-                                    <NavLink tag={Link} className={`text-dark ${pathname === '/api' ? 'active' : ''}`} to="/api">Convert SQL</NavLink>
+                                    <NavLink tag={Link} className={`text-dark ${pathname === '/api' ? 'active' : ''}`} to="/api">Main Tab</NavLink>
                                 </NavItem>
                                 <NavItem>
                                     <NavLink tag={Link} className={`text-dark ${pathname === '/reference' ? 'active' : ''}`} to="/reference">API Reference</NavLink>

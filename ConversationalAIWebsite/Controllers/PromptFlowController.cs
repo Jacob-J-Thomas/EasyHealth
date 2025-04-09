@@ -10,24 +10,40 @@ using Stripe.Checkout;
 using System.Net;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using Microsoft.AspNetCore.Authorization;
+using ConversationalAIWebsite.Client.IntelligenceHub;
 
 namespace ConversationalAIWebsite.Controllers
 {
     [ApiController]
-    [Authorize(Policy = "Auth0Policy")]
+    [Authorize(Policy = Policies.Auth0Policy)]
     [Route("[controller]")]
     public class PromptFlowController : ControllerBase
     {
         private readonly IAuthLogic _authLogic;
         private readonly IPromptFlowLogic _promptFlowLogic;
 
-        // Default error message for 429 responses
-        private const string _requestLimitExceededMessage = "You have reached the maximum number of requests allowed per day.";
-
         public PromptFlowController(IAuthLogic authLogic, IPromptFlowLogic promptLogic, StripeSettings settings)
         {
             _authLogic = authLogic;
             _promptFlowLogic = promptLogic;
+        }
+
+        [HttpGet("get/newBearerKey/{username}")]
+        public async Task<IActionResult> GetStreamKey([FromRoute] string username)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
+
+                var response = await _promptFlowLogic.GetIntelligenceHubBearerKey(username);
+
+                if (response.Success) return Ok(response.Data);
+                else return StatusCode((int)response.StatusCode, response.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when generating the API key");
+            }
         }
 
         [HttpGet("get/newAPIKey/{username}")]
@@ -48,13 +64,49 @@ namespace ConversationalAIWebsite.Controllers
             }
         }
 
-        [HttpGet("get/sqlData/{username}")]
-        public IActionResult GetSQLData([FromRoute] string username)
+        [HttpGet("get/profile/{profile}")]
+        public async Task<IActionResult> GetProfile([FromRoute] string profile)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(profile)) return BadRequest("The profile name is required.");
+
+                var response = await _promptFlowLogic.GetProfile(profile);
+
+                if (response.Success) return Ok(response.Data);
+                else return StatusCode((int)response.StatusCode, response.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when getting the profile.");
+            }
+        }
+
+        [HttpPost("post/profile")]
+        public async Task<IActionResult> UpsertProfile([FromBody] Profile profile)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(profile.Name)) return BadRequest("The profile name is required.");
+
+                var response = await _promptFlowLogic.UpsertProfile(profile);
+
+                if (response.Success) return Ok(response.Data);
+                else return StatusCode((int)response.StatusCode, response.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when generating the API key");
+            }
+        }
+
+        [HttpGet("get/Users/{username}")]
+        public async Task<IActionResult> GetUserData([FromRoute] string username)
         {
             try
             {
                 if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
-                var response = _promptFlowLogic.GetSQLData(username);
+                var response = await _promptFlowLogic.GetUserData(username);
                 if (response.Success) return Ok(response.Data);
                 else return StatusCode((int)response.StatusCode, response.Message);
             }
@@ -79,71 +131,6 @@ namespace ConversationalAIWebsite.Controllers
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when saving user data");
-            }
-        }
-
-        [HttpPost("post/sqlData")]
-        public async Task<IActionResult> SaveSQLData([FromBody] FrontEndRequest requestBody)
-        {
-            try
-            {
-                if (requestBody == null) return BadRequest("The request body is malformed.");
-                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
-                if (string.IsNullOrEmpty(requestBody.SqlData)) return BadRequest("The SQL data is required.");
-
-                var response = await _promptFlowLogic.UpsertUserSQLData(requestBody);
-
-                if (response.Success) return NoContent();
-                else return StatusCode((int)response.StatusCode, response.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when authenticating");
-            }
-        }
-
-        [HttpPost("post/sqlHelp")]
-        public async Task<IActionResult> RequestSQLDataHelp([FromBody] FrontEndRequest requestBody)
-        {
-            try
-            {
-                if (requestBody == null) return BadRequest("The request body is malformed.");
-                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
-                if (string.IsNullOrEmpty(requestBody.SqlData)) return BadRequest("The SQL data is required.");
-                if (string.IsNullOrEmpty(requestBody.Query)) return BadRequest("The query is required.");
-
-                var response = await _promptFlowLogic.GetSQLDataHelp(requestBody);
-
-                if (response.Success) return Ok(response.Data);
-                else if (response.StatusCode == HttpStatusCode.TooManyRequests) return StatusCode(429, _requestLimitExceededMessage);
-                else if (response.Message.Contains("concurrency")) return Conflict("A concurrency error occurred. Please retry the request.");
-                else return StatusCode((int)response.StatusCode, response.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong when requesting SQL assistance");
-            }
-        }
-
-        [HttpPost("post/convertQuery")]
-        public async Task<IActionResult> ConvertQueryToSQL([FromBody] FrontEndRequest requestBody)
-        {
-            try
-            {
-                if (requestBody == null) return BadRequest("The request body is malformed.");
-                if (string.IsNullOrEmpty(requestBody.Username)) return BadRequest("The username is required.");
-                if (!requestBody.Messages.Any(x => x.Role == Client.IntelligenceHub.Role.User)) return BadRequest("A user query is required.");
-
-                var response = await _promptFlowLogic.ConvertQueryToSQL(requestBody);
-
-                if (response.Success) return Ok(response.Data);
-                else if (response.StatusCode == HttpStatusCode.TooManyRequests) return StatusCode(429, _requestLimitExceededMessage);
-                else if (response.Message.Contains("concurrency")) return Conflict("A concurrency error occurred. Please retry the request.");
-                else return StatusCode((int)response.StatusCode, response.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong during SQL conversion.");
             }
         }
     }

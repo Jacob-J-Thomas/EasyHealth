@@ -8,19 +8,19 @@ namespace ConversationalAIWebsite.DAL
 {
     public class AppDbContext : DbContext
     {
-        public DbSet<UserData> UserData { get; set; } = null!;
+        public DbSet<Users> Users { get; set; } = null!;
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<UserData>(entity =>
+            modelBuilder.Entity<Users>(entity =>
             {
                 entity.HasKey(e => e.Username);
                 entity.Property(e => e.EncryptedApiKey).IsRequired(false);
                 entity.Property(e => e.ApiKeyGeneratedDate).IsRequired(false);
-                entity.Property(e => e.UserSQLData).HasMaxLength(4000).IsRequired(false);
+                entity.Property(e => e.ExampleDataField).HasMaxLength(4000).IsRequired(false);
                 entity.Property(e => e.IsPayingCustomer).IsRequired().HasDefaultValue(false);
                 entity.Property(e => e.RequestCount).IsRequired().HasDefaultValue(0);
                 entity.Property(e => e.LastRequestDate).IsRequired(false);

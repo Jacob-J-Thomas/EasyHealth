@@ -2,14 +2,14 @@
 
 namespace ConversationalAIWebsite.DAL.Models
 {
-    public class UserData
+    public class Users
     {
         [Key]
         public required string Username { get; set; }
         public string? EncryptedApiKey { get; set; }
         public DateTime? ApiKeyGeneratedDate { get; set; }
         [MaxLength(4000)]
-        public string? UserSQLData { get; set; }
+        public string? ExampleDataField { get; set; }
         public bool IsPayingCustomer { get; set; } = false;
         public int RequestCount { get; set; } = 0;
         public DateTime? LastRequestDate { get; set; }
