@@ -1,0 +1,100 @@
+﻿.message-container {
+    max-width: 75%;
+    width: fit-content;
+    background-color: #2e2e2e; /* Darker background for message container */
+    color: #e0e0e0; /* Light text color for contrast */
+}
+
+    .message-container.align-left {
+        margin-right: auto;
+        color: #e0e0e0;
+    }
+
+        .message-container.align-left .message {
+            color: #0f0f0f;
+        }
+
+    .message-container.align-right {
+        margin-left: auto;
+        color: #e0e0e0;
+    }
+
+    .message-container.align-right .message {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+.message {
+    border-radius: 0.25rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: .25rem;
+    line-height: 1.8; /* Adjust to control text spacing */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    max-width: fit-content;
+    box-sizing: border-box;
+    background-color: #0f0f0f; /* Dark blue background for messages */
+}
+
+    .message p {
+        max-width: fit-content;
+    }
+
+    .message-body {
+        max-width: fit-content;
+    }
+
+.time-stamp {
+    margin-top: -1rem;
+    margin-left: inherit;
+    margin-right: inherit;
+    font-size: 0.75rem; /* Use rem for better scalability */
+    color: #b0b0b0; /* Lighter color for timestamps */
+}
+
+    .time-stamp.align-right {
+        text-align: right;
+    }
+
+    .time-stamp.align-left {
+        text-align: left;
+    }
+
+.author {
+    margin-bottom: .25rem;
+    font-weight: bold;
+}
+
+    .author.align-left {
+        text-align: left;
+    }
+
+    .author.align-right {
+        text-align: right;
+    }
+
+pre {
+    color: #ffffff;
+    border-radius: .25rem;
+    padding: 1rem;
+    background-color: #030303;
+}
+
+.message ol,
+.message ul {
+    margin: 0; /* Remove default margin */
+    color: white;
+}
+
+.message pre {
+    overflow-x: auto; /* Allow horizontal scrolling for code snippets */
+    white-space: pre-wrap; /* Allow code to wrap */
+    word-wrap: normal; /* Reset word-wrap for pre elements */
+    max-width: 100%; /* Ensure pre elements don't exceed the container width */
+}
+
+.message-container.align-right .author {
+    color: #e0e0e0;  /* Ensure text color for left-aligned author remains light */
+}

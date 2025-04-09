@@ -1,0 +1,25 @@
+/* Resetting basic styles for consistency across browsers */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Ensure the entire app fills the viewport */
+html, body, #root, .App {
+    height: 100%;
+    width: 100%;
+    font-family: 'Arial', sans-serif;
+    background-color: #1e1e1e; /* Dark background for the app */
+    color: #e0e0e0; /* Light text color for contrast */
+    overflow-x: hidden;
+}
+
+
+/* Allow overflow in the WindowWrapper component */
+.WindowWrapper {
+    height: 100%;
+    width: 100%;
+    overflow: auto; /* Allow scrollbars */
+}
+

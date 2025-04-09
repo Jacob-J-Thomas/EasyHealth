@@ -1,0 +1,94 @@
+/* ChatWindow.css */
+.chat-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: #1e1e1e; /* Dark background for chat window */
+    border: 0.0625em solid #444; /* Darker border */
+    overflow-y: auto;
+    box-sizing: border-box;
+    color: #e0e0e0; /* Light text color for contrast */
+    border-radius: 0.25em;
+    margin-bottom: inherit;
+}
+
+.message-list {
+    flex: 1;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding: 0.625em;
+    background-color: #2e2e2e; /* Darker background for message list */
+}
+
+.message {
+    margin-bottom: 0.625em;
+}
+
+.chat-input {
+    display: flex;
+    padding: 0.625em;
+    background-color: #2e2e2e; /* Darker background for chat input */
+    width: 100%;
+}
+
+.chat-input-input-container {
+    flex: 1; /* Allow this container to take up available space */
+    min-width: 0; /* Prevent content from forcing the container to grow beyond its parent */
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-input input:focus {
+    outline: none;
+    box-shadow: 0 0 10px 2px rgba(0, 123, 255, 0.5); /* Light blue glow */
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 0.5em;
+    border: 0.0625em solid #444; /* Darker border */
+    border-radius: 0.25em;
+    margin-right: 0.3125em;
+    background-color: #3e3e3e; /* Darker input background */
+    color: #e0e0e0; /* Light text color */
+}
+
+.chat-input label {
+    display: block; /* Ensure the label is a block element */
+    margin-left: 1em;
+    margin-bottom: -.7em;
+    z-index: 1;
+    font-size: 1rem;
+    color: #e0e0e0; /* Light text color */
+}
+
+.toolbar-button {
+    align-self: flex-end; /* Align the button to the right */
+    padding: 9px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+    .toolbar-button:hover {
+        background-color: #0056b3;
+    }
+
+.chat-input button {
+    border: none;
+    border-radius: 0.25em;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+}
+
+    .chat-input button:hover {
+        background-color: #0056b3;
+    }

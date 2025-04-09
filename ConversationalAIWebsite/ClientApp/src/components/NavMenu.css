@@ -1,0 +1,128 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+.navbar {
+    background-color: #f1f1f1;
+    display: flex;
+    flex-direction: row; /* Align items horizontally */
+    justify-content: space-between; /* Ensure space between the brand and nav items */
+    align-items: center;
+    font-family: 'Roboto Mono', monospace;
+    position: relative;
+    width: 100vw; /* Full viewport width */
+    padding: 1em 2em;
+    box-sizing: border-box; /* Prevent overflow from padding */
+    margin: 0; /* Remove margins that could cause horizontal scrolling */
+}
+
+.navbar-content-container {
+    max-width: 80vw; /* Restrict content to 80% of the viewport */
+    width: 100%;
+    margin: 0 auto; /* Center the content */
+    display: flex;
+    justify-content: space-between; /* Distribute space between brand and nav items */
+    align-items: center;
+}
+
+a.navbar-brand {
+    white-space: normal;
+    text-align: left;
+    word-break: break-all;
+    color: #000000; /* Slightly lighter off-white color */
+    font-size: 2rem; /* Increased size */
+    font-weight: bold; /* Bold text */
+    position: relative;
+}
+
+    a.navbar-brand::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: #000000;
+        margin-top: 0.5rem;
+    }
+
+.navbar-subtitle {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.9rem;
+    color: #666666;
+    margin-top: 0.5rem;
+    font-weight: bold; /* Bold text */
+}
+
+.nav-collapse-bottom {
+    position: relative;
+    display: flex;
+    justify-content: flex-end; /* Align nav items to the right, adjust as needed */
+}
+
+
+.navbar-nav {
+    display: flex;
+    gap: 1.5rem; /* Add spacing between the nav items */
+    text-align: center;
+}
+
+.nav-item {
+    list-style-type: none;
+}
+
+.nav-link {
+    font-weight: bolder;
+    position: relative;
+    color: #000000;
+    transition: color 0.1s ease-in-out;
+}
+
+    .nav-link::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #007bff;
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+        color: #007bff;
+    }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            transform: scaleX(1);
+        }
+
+
+/* Container for the logout button placed above the nav items */
+.nav-collapse-bottom {
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: flex-end; /* Align children to the right */
+    gap: 0.5rem; /* Optional: adds spacing between rows */
+}
+
+.logout-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; /* Align the logout button to the right */
+    margin-bottom: 0.5rem; /* Add spacing below the logout button */
+}
+
+
+
+
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
