@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /ConversationalAIWebsite/appsettings.json
 /ConversationalAIWebsite/Host/appsettings.json
 /AIPoweredSQLConverter/appsettings.json
+/PersonalPortfolio/appsettings.Development.json

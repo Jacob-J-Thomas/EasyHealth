@@ -1,0 +1,25 @@
+using Xunit;
+using PersonalPortfolio.Client.IntelligenceHub;
+using PersonalPortfolio.Business;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Moq;
+using PersonalPortfolio.DAL;
+using PersonalPortfolio.Host.Config;
+
+namespace PersonalPortfolio.Tests.Integration
+{
+    public class PromptFlowLogicTests
+    {
+        private readonly Mock<IAIClientWrapper> _mockAIClientWrapper;
+        private readonly Mock<AppDbContext> _appDbContext;
+        private readonly Mock<StripeSettings> _stripeSettings;
+        private readonly PromptFlowLogic _promptFlowLogic;
+
+        public PromptFlowLogicTests()
+        {
+            _mockAIClientWrapper = new Mock<IAIClientWrapper>();
+            _promptFlowLogic = new PromptFlowLogic(_mockAIClientWrapper.Object, _appDbContext.Object, _stripeSettings.Object);
+        }
+    }
+}
