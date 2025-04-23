@@ -1,6 +1,6 @@
 {
-  "domain": "dev-64itzp4npb4uo8uv.us.auth0.com",
-  "clientId": "7Gc1JUtnTnL0W5gnAEb7dPDf2Cf8Id4p",
+  "domain": "applied-ai.us.auth0.com",
+  "clientId": "WzqOKlTCQa0LexhXOPLal4uwVtDiAJqo",
   "audience": "https://jacobthomas-fmh4huhdhba7fvfq.centralus-01.azurewebsites.net",
   "scope": "openid profile email sub",
   "ApiUri": "https://jacobthomas-fmh4huhdhba7fvfq.centralus-01.azurewebsites.net",
