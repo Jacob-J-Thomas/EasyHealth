@@ -7,7 +7,7 @@ export class Message extends Component {
     static displayName = Message.name;
 
     render() {
-        const { author, content, timestamp, alignRight } = this.props;
+        const { author, content, alignRight } = this.props;
         const alignmentClass = alignRight ? 'align-left' : 'align-right';
         const messageStyle = {
             backgroundColor: alignRight ? '#ebebeb' : '#007bff' 
