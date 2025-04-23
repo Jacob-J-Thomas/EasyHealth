@@ -9,7 +9,7 @@ function ChatWindow({ clearMessages }) {
     const [messages, setMessages] = useState([
         {
             role: 'Assistant',
-            content: `Hi there! I'm StackSherpa, your guide to Jacob Thomas's technical skills, projects, and experience. \n\nHow can I help you today? Looking to explore Jacob's experience with AI, .NET, or Python, see if he might be a good fit for your team, or make an inquiry about his startup, Applied AI, or one of its products? \n\nPlease remember that as an AI, I can make mistakes from time to time, so remember to verify anything important with Jacob himself.`,
+            content: `Hi there! I'm StackSherpa, your assistant in summitting Jacob Thomas's technical skills, projects, and experience. \n\nAre you looking to explore Jacob's experience with AI, .NET, or Python, see if he might be a good fit for your team, or make an inquiry about his startup, Applied AI, or one of its products? \n\nBy the way, please remember that as an AI, I can make mistakes from time to time, so be sure to verify anything important with Jacob himself.`,
             timestamp: new Date().toISOString(),
         },
     ]);

@@ -20,7 +20,7 @@ const AboutMe = () => {
             <div className="about-me-text-bubble">
                 <h1 className="about-me-title">About Me</h1>
                 <p className="about-me-text">
-                    I am a .NET AI Engineer with over two years of experience at Convergint, where I developed a variety of AI solutions, and more recently, for products I host through my start up, <a href="https://appliedai-org.github.io/homepage/">Applied AI</a>.
+                    I am a .NET AI Engineer with over two years of experience at Convergint, where I developed a variety of AI solutions. More recently, I've been working on some products I host through my start up, <a href="https://appliedai-org.github.io/homepage/">Applied AI</a>.
                 </p>
                 <p className="about-me-text">
                     I've worked across the stack, implementing anything from the front end for natural language filters, to RAG vector pipelines for enterprise grade chatbots.
