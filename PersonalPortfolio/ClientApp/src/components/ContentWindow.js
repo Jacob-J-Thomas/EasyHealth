@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import ApiClient from '../api/ApiClient';
 import './ContentWindow.css';
-import { useAuth0 } from '@auth0/auth0-react';
 import authConfig from '../auth_config.json';
 
 function ContentWindow() {
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const { getAccessTokenSilently } = useAuth0();
     
     useEffect(() => {
-        const apiClient = new ApiClient(authConfig.ApiUri, getAccessTokenSilently);
+        const apiClient = new ApiClient(authConfig.ApiUri);
         async function fetchProfileData() {
             const data = await apiClient.getProfileData('test');
             if (data === "Something went wrong...") {
@@ -27,7 +25,7 @@ function ContentWindow() {
             setLoading(false);
         }
         fetchProfileData();
-    }, [getAccessTokenSilently]);
+    });
 
     if (loading) {
         return <div>Loading...</div>;

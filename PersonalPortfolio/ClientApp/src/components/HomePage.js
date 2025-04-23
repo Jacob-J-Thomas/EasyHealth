@@ -1,104 +1,65 @@
 import React from 'react';
 import FooterSection from './FooterSection';
 import { NavMenu } from './NavMenu';
-import { useAuth0 } from "@auth0/auth0-react";
-import authConfig from '../auth_config.json';
 import './HomePage.css';
+import WindowWrapper from './WindowWrapper';
+import AboutMe from './AboutMe';
+import Projects from './Projects';
+import Skills from './Skills';
 
 function HomePage() {
-    const { loginWithRedirect } = useAuth0();
-
-    const handleSignUp = () => {
-        loginWithRedirect({
-            authorizationParams: {
-                audience: authConfig.audience, // Consistent audience
-                scope: authConfig.scope,
-            },
-        });
-    };
-
     return (
         <div className="home-page-container">
             <NavMenu />
-            <header className="hero-section">
-                <div className="hero-content">
-                    <h1>Subtitle Goes Here</h1>
-                    <p>
-                        We can place a small little blurb here giving some additional data about the product, how it can be used, and 
-                        more data that's useful. Really sell the tool, product or service.
-                    </p>
-                    <button className="signup-button" onClick={handleSignUp}>
-                        Sign Up Now
-                    </button>
-                </div>
-            </header>
 
-            <section className="info-section">
-                <div className="pricing-table">
-                    <h2>Pricing</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Plan</th>
-                                <th>Free Requests</th>
-                                <th>API Access</th>
-                                <th>Cost per Request</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Free</td>
-                                <td>20/day</td>
-                                <td>✔️</td>
-                                <td>$0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Paid Tier</td>
-                                <td>Paid requests amount number</td>
-                                <td>✔️</td>
-                                <td>$200</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div className="features">
-                    <h2>Why Should You Use This Project?</h2>
-                    <ul>
-                        <li>
-                            <strong>Reason 1:</strong> This is the first reason.
-                        </li>
-                        <li>
-                            <strong>Reason 2:</strong> This is the second reason.
-                        </li>
-                        <li>
-                            <strong>Reason 3:</strong> This is the third reason.
-                        </li>
-                        <li>
-                            <strong>Reason 4:</strong> This is the fourth reason.
-                        </li>
-                    </ul>
-                </div>
+            <section id="about-and-window-wrapper" className="about-and-window-wrapper">
+                <AboutMe />
+                <WindowWrapper />
             </section>
 
-            <section className="contact-section">
-                <h2>Contact Us</h2>
+            <section id="projects-section" className="projects-section">
+                <Projects />
+            </section>
+
+            <section id="skills-section" className="skills-section">
+                <Skills />
+            </section>
+
+            <section id="contact-section" className="contact-section">
+                <h2 className="section-title">Contact Me</h2>
                 <p>
-                    Checkout other projects by us at{' '}
-                    <a href="https://appliedai-org.github.io/homepage/">
-                        appliedai-org.github.io/homepage
-                    </a>.
+                    <strong>Phone:</strong> <a href="tel:6308802110">630-880-2110</a>
                 </p>
                 <p>
-                    If you have any questions, feedback, or need support, please reach out to us at{' '}
-                    <a href="mailto:applied.ai.help@gmail.com">
-                        applied.ai.help@gmail.com
-                    </a>, or submit an issue on{' '}
+                    <strong>Email:</strong> <a href="mailto:JacobJonThomas@gmail.com">JacobJonThomas@gmail.com</a>
+                </p>
+                <p>
+                    <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/jacob-thomas-546268131/">My LinkedIn Profile</a>
+                </p>
+                <p>
+                    <strong>Follow me on X:</strong> <a href="https://x.com/JacobThoma38517">@JacobThoma38517</a>
+                </p>
+                <p>
+                    <strong>LLC Website:</strong> <a href="https://appliedai-org.github.io/homepage/">Applied AI Landing Page</a>
+                </p>
+                <p>
+                    <strong>LLC Email:</strong> <a href="mailto:jacob.thomas@applied-ai-org.com">jacob.thomas@applied-ai-org.com</a>
+                </p>
+                <p>
+                    You can also check out my work on{' '}
                     <a
                         href="https://github.com/AppliedAI-Org"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        our GitHub page
+                        My Startup's GitHub
+                    </a> and{' '}
+                    <a
+                        href="https://github.com/Jacob-J-Thomas"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        My Personal GitHub
                     </a>.
                 </p>
             </section>

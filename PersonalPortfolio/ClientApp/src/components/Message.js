@@ -21,7 +21,6 @@ export class Message extends Component {
                         {content}
                     </ReactMarkdown>
                 </div>
-                <p className={`time-stamp ${alignmentClass}`}>{timestamp}</p>
             </div>
         );
     }

@@ -229,7 +229,7 @@ namespace PersonalPortfolio.Business
             }
         }
 
-        public async Task<BackendResponse<string>> GetIntelligenceHubBearerKey(string username)
+        public async Task<BackendResponse<string>> GetIntelligenceHubBearerKey()
         {
             try
             {

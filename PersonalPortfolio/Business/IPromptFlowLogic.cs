@@ -14,7 +14,7 @@ namespace PersonalPortfolio.Business
         Task<BackendResponse<bool>> UpsertUserData(PublicApiRequest request, string apiKey);
         Task<BackendResponse<string>> GenerateAndStoreApiKey(string username);
         Task <BackendResponse<Profile?>> UpsertProfile(Profile profile);
-        Task <BackendResponse<string>> GetIntelligenceHubBearerKey(string username);
+        Task <BackendResponse<string>> GetIntelligenceHubBearerKey();
     }
 }
 

@@ -10,6 +10,28 @@
     box-sizing: border-box;
 }
 
+/* Ensure the NavMenu is centered */
+.navbar {
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    text-align: center;
+    padding: 1em 0; /* Add some vertical padding */
+    box-sizing: border-box;
+}
+
+/* Ensure the navbar content container is centered */
+.navbar-content-container {
+    max-width: 1200px; /* Limit the width for better alignment */
+    margin: 0 auto; /* Center the container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
 /* Hero section styling */
 .hero-section {
     width: 100%;
@@ -35,6 +57,44 @@
     line-height: 1.6;
     margin-bottom: 1.5em;
 }
+
+/* Section title styling */
+.section-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 0.5em;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Section subtitle styling */
+.section-subtitle {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #666666;
+    margin-bottom: 1.5em;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* Contact section links */
+.contact-section a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.contact-section p {
+    text-align: center;
+}
+
+    .contact-section a:hover {
+        text-decoration: underline;
+    }
 
 .signup-button {
     position: relative;
@@ -179,40 +239,105 @@
 
 
 
-/* Contact section styling - similar bubble style */
+/* Contact section styling with hover and animation effects */
 .contact-section {
     background-color: #f7f7f7;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* Match the rounded corners */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Add depth */
     padding: 2em;
     max-width: 60vw;
-    width: 100%;
     margin: 2em auto 6rem;
     text-align: left;
     color: #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
 }
 
+    .contact-section:hover {
+        transform: translateY(-5px); /* Lift effect on hover */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+    }
+
+    /* Contact section title and subtitle */
     .contact-section h2 {
         font-family: 'Roboto Mono', monospace;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333333;
         margin-bottom: 0.5em;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
 
     .contact-section p {
         font-size: 1rem;
         margin-bottom: 0.5em;
+        text-align: left;
     }
 
     .contact-section a {
         color: #007bff;
         text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s ease; /* Smooth color transition */
     }
 
         .contact-section a:hover {
+            color: #0056b3; /* Darker blue on hover */
             text-decoration: underline;
         }
 
+
+.about-and-window-wrapper {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping by default */
+    justify-content: space-between;
+    align-items: stretch; /* Ensure both components stretch to the same height */
+    gap: 1.5em;
+    width: 100%;
+    max-width: 80vw;
+    margin: 2em auto;
+    box-sizing: border-box;
+    height: 100%; /* Ensure the wrapper takes full height */
+}
+
+.about-me-container,
+.window-wrapper-container {
+    flex: 1 1 50%; /* Ensure both components take up equal width */
+    height: 100%; /* Match height */
+    min-height: 80vh;
+    max-height: 80vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.projects-container {
+    overflow: hidden; /* Prevent vertical overflow */
+    overflow-x: visible; /* Allow horizontal overflow */
+}
+
+/* Stack components vertically on smaller screens */
+@media (max-width: 1370px) {
+    .about-and-window-wrapper {
+        flex-direction: column; /* Stack components vertically */
+        gap: 1em; /* Adjust spacing between stacked components */
+    }
+
+    .about-me-container,
+    .window-wrapper-container {
+        flex: 1 1 100%; /* Take up full width */
+        max-width: 100%; /* Prevent horizontal overflow */
+        height: auto; /* Allow height to adjust naturally */
+        min-height: auto; /* Remove fixed height constraints */
+        max-height: none;
+    }
+}
+
+
+
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: 1370px) {
     .contact-section {
         max-width: 90vw;
     }

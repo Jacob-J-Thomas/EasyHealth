@@ -3,19 +3,12 @@ using PersonalPortfolio.Business;
 using PersonalPortfolio.Common;
 using PersonalPortfolio.Host.Config;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using Stripe;
-using Stripe.Checkout;
-using System.Net;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using Microsoft.AspNetCore.Authorization;
 using PersonalPortfolio.Client.IntelligenceHub;
 
 namespace PersonalPortfolio.Controllers
 {
     [ApiController]
-    [Authorize(Policy = Policies.Auth0Policy)]
     [Route("[controller]")]
     public class PromptFlowController : ControllerBase
     {
@@ -28,14 +21,12 @@ namespace PersonalPortfolio.Controllers
             _promptFlowLogic = promptLogic;
         }
 
-        [HttpGet("get/newBearerKey/{username}")]
-        public async Task<IActionResult> GetStreamKey([FromRoute] string username)
+        [HttpGet("get/newBearerKey")]
+        public async Task<IActionResult> GetStreamKey()
         {
             try
             {
-                if (string.IsNullOrEmpty(username)) return BadRequest("The username is required.");
-
-                var response = await _promptFlowLogic.GetIntelligenceHubBearerKey(username);
+                var response = await _promptFlowLogic.GetIntelligenceHubBearerKey();
 
                 if (response.Success) return Ok(response.Data);
                 else return StatusCode((int)response.StatusCode, response.Message);
@@ -47,6 +38,7 @@ namespace PersonalPortfolio.Controllers
         }
 
         [HttpGet("get/newAPIKey/{username}")]
+        [Authorize(Policy = Policies.Auth0Policy)]
         public async Task<IActionResult> GetNewAPIKey([FromRoute] string username)
         {
             try
@@ -65,6 +57,7 @@ namespace PersonalPortfolio.Controllers
         }
 
         [HttpGet("get/profile/{profile}")]
+        [Authorize(Policy = Policies.Auth0Policy)]
         public async Task<IActionResult> GetProfile([FromRoute] string profile)
         {
             try
@@ -83,6 +76,7 @@ namespace PersonalPortfolio.Controllers
         }
 
         [HttpPost("post/profile")]
+        [Authorize(Policy = Policies.Auth0Policy)]
         public async Task<IActionResult> UpsertProfile([FromBody] Profile profile)
         {
             try
@@ -101,6 +95,7 @@ namespace PersonalPortfolio.Controllers
         }
 
         [HttpGet("get/Users/{username}")]
+        [Authorize(Policy = Policies.Auth0Policy)]
         public async Task<IActionResult> GetUserData([FromRoute] string username)
         {
             try
@@ -117,6 +112,7 @@ namespace PersonalPortfolio.Controllers
         }
 
         [HttpPost("post/saveUser/{username}")]
+        [Authorize(Policy = Policies.Auth0Policy)]
         public async Task<IActionResult> SaveUserData([FromRoute] string username)
         {
             try

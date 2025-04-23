@@ -1,17 +1,17 @@
 ﻿.footer {
-    position: absolute;
+    position: relative; /* Change from absolute/fixed to relative */
     padding: 5px;
     bottom: 0;
-    width: 90%;
+    width: 100%;
     text-align: center;
     background-color: #1e1e1e;
     color: #e0e0e0;
     font-size: 0.8rem;
-    z-index: 2;
+    box-sizing: border-box; /* Ensure padding is included in the width */
 }
 
 @media (max-width: 1200px) {
     .footer {
-        position: fixed;
+        position: relative; /* Keep it relative for smaller screens */
     }
 }

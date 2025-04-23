@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Navbar, NavbarBrand, NavItem, NavLink } from 'reactstrap';
+import { Navbar, NavbarBrand } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import AuthButton from './AuthButton';
 import './NavMenu.css';
 
 export class NavMenu extends Component {
@@ -22,35 +21,22 @@ export class NavMenu extends Component {
     }
 
     render() {
-        const { pathname } = window.location;
-
         return (
             <header>
                 <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom mb-3" container light>
                     <div className="navbar-content-container">
-                        <div className="d-flex flex-column align-items-start">
-                            <NavbarBrand tag={Link} to="/api">App Title</NavbarBrand>
-                            <h3 className="navbar-subtitle">The Application Subtitle Goes Here</h3>
+                        <div className="text-center-container">
+                            <NavbarBrand tag={Link} to="/" className="navbar-title">Jacob Thomas</NavbarBrand>
+                            <h3 className="navbar-subtitle">AI Engineer | Entrepreneur</h3>
                         </div>
-                        <div className="nav-collapse-bottom">
-                            <div className="logout-container">
-                                <AuthButton />
-                            </div>
-                            <div className="navbar-nav">
-                                <NavItem>
-                                    <NavLink tag={Link} className={`text-dark ${pathname === '/' || pathname === '/home' ? 'active' : ''}`} to="/home">Home</NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink tag={Link} className={`text-dark ${pathname === '/api' ? 'active' : ''}`} to="/api">Main Tab</NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink tag={Link} className={`text-dark ${pathname === '/reference' ? 'active' : ''}`} to="/reference">API Reference</NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink tag={Link} className="text-dark" to="/stripe-portal">Manage Subscription</NavLink>
-                                </NavItem>
-                            </div>
-                        </div>
+                        <nav className="navigation-panel">
+                            <ul className="nav-links">
+                                <li><a href="#about-and-window-wrapper">About Me</a></li>
+                                <li><a href="#projects-section">Projects</a></li>
+                                <li><a href="#skills-section">Skills</a></li>
+                                <li><a href="#contact-section">Contact</a></li>
+                            </ul>
+                        </nav>
                     </div>
                 </Navbar>
             </header>

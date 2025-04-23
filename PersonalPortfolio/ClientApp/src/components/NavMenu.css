@@ -1,7 +1,7 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
 
 .navbar {
-    background-color: #f1f1f1;
+    background-color: #f9f8f7;
     display: flex;
     flex-direction: row; /* Align items horizontally */
     justify-content: space-between; /* Ensure space between the brand and nav items */
@@ -15,20 +15,19 @@
 }
 
 .navbar-content-container {
-    max-width: 80vw; /* Restrict content to 80% of the viewport */
-    width: 100%;
-    margin: 0 auto; /* Center the content */
     display: flex;
-    justify-content: space-between; /* Distribute space between brand and nav items */
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 a.navbar-brand {
     white-space: normal;
-    text-align: left;
+    text-align: center; /* Ensure text is centered */
     word-break: break-all;
     color: #000000; /* Slightly lighter off-white color */
-    font-size: 2rem; /* Increased size */
+    font-size: 2.5rem; /* Increased size */
     font-weight: bold; /* Bold text */
     position: relative;
 }
@@ -42,12 +41,34 @@ a.navbar-brand {
         margin-top: 0.5rem;
     }
 
+/* Navbar title styling */
+.navbar-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    text-decoration: none;
+    transition: 300ms;
+}
+
+    .navbar-title:hover {
+        transition: 200ms;
+        color: #007bff;
+    }
+
+/* Navbar subtitle styling */
 .navbar-subtitle {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 0.9rem;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 400;
     color: #666666;
     margin-top: 0.5rem;
-    font-weight: bold; /* Bold text */
+    text-align: center;
+    letter-spacing: 0.5px;
 }
 
 .nav-collapse-bottom {
@@ -67,35 +88,46 @@ a.navbar-brand {
     list-style-type: none;
 }
 
-.nav-link {
-    font-weight: bolder;
-    position: relative;
-    color: #000000;
-    transition: color 0.1s ease-in-out;
+.navigation-panel {
+    margin-top: 10px;
 }
 
-    .nav-link::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 2px;
-        background-color: #007bff;
-        transform: scaleX(0);
-        transform-origin: center;
-        transition: transform 0.3s ease-in-out;
+.nav-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    font-weight: lighter;
+}
+
+    .nav-links a {
+        text-decoration: none;
+        color: #555555;
+        font-weight: normal;
+        position: relative; /* Required for pseudo-elements */
+        transition: color 0.3s ease; /* Smooth color transition */
     }
 
-    .nav-link:hover,
-    .nav-link.active {
-        color: #007bff;
-    }
-
-        .nav-link:hover::after,
-        .nav-link.active::after {
-            transform: scaleX(1);
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -3px; /* Position the underline just below the text */
+            width: 0;
+            height: 2px;
+            background-color: #007bff;
+            transition: width 0.3s ease; /* Smooth underline animation */
         }
+
+        .nav-links a:hover {
+            color: #333333; /* Darker shade of blue for hover */
+        }
+
+            .nav-links a:hover::after {
+                width: 100%; /* Expand the underline on hover */
+            }
+
 
 
 /* Container for the logout button placed above the nav items */
@@ -114,7 +146,25 @@ a.navbar-brand {
     margin-bottom: 0.5rem; /* Add spacing below the logout button */
 }
 
+.profile-photo {
+    width: 6rem; /* Adjust size as needed */
+    height: 6rem; /* Ensure the height matches the width for a perfect circle */
+    border-radius: 50%; /* Makes the image circular */
+    object-fit: scale-down; /* Ensures the image scales properly */
+    margin-bottom: 0.5rem; /* Adds spacing below the image */
+    border: none; /* Removes the border */
+    image-rendering: auto; /* Ensures the image is rendered smoothly */
+}
 
+.text-center-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally */
+    justify-content: center; /* Center items vertically */
+    text-align: center; /* Ensure text is centered */
+    width: 100%; /* Take full width of the container */
+    margin-bottom: 10px;
+}
 
 
 html {

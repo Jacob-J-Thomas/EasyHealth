@@ -1,0 +1,106 @@
+﻿.projects-container {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5em;
+    background: #f9f8f7;
+    border-radius: 6px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    max-height: 900px;
+    max-width: 80vw;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.projects-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.5em;
+    color: #333333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: sticky; /* Keep the title stationary */
+    top: 0; /* Stick to the top of the container */
+    z-index: 1; /* Ensure it stays above the scrolling content */
+    padding: 0.5em 0; /* Add some padding for better spacing */
+    background-color: #f9f8f7; /* Match the container's base color */
+}
+
+.projects-list-container {
+    overflow: auto;
+}
+
+.projects-list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1.5em;
+    justify-content: flex-start;
+    padding-bottom: 1em;
+    scrollbar-width: thin;
+    scrollbar-color: #007bff #f0f0f0;
+    -webkit-overflow-scrolling: touch;
+}
+
+    .projects-list::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .projects-list::-webkit-scrollbar-track {
+        background-color: #f0f0f0; /* Light background for the scrollbar track */
+        border-radius: 6px; /* Rounded edges for the scrollbar track */
+    }
+
+    .projects-list::-webkit-scrollbar-thumb {
+        background: #007bff; /* Solid color for the scrollbar thumb */
+        border-radius: 6px; /* Rounded edges for the scrollbar thumb */
+    }
+
+        .projects-list::-webkit-scrollbar-thumb:hover {
+            background: #0056b3; /* Darker color on hover */
+        }
+
+.project-card {
+    background-color: #ffffff;
+    padding: 1.5em;
+    margin-top: 1em;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 320px;
+    min-width: 320px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+.project-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1em;
+    color: #333333;
+}
+
+.project-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1em;
+    color: #555555;
+}
+
+.project-links {
+    display: flex;
+    justify-content: space-around;
+}
+
+.project-link {
+    font-size: 1rem;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+    .project-link:hover {
+        color: #0056b3;
+    }

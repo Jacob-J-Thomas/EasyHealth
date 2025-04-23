@@ -3,6 +3,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 80vh;
     width: 100%;
     background-color: #1e1e1e; /* Dark background for chat window */
     border: 0.0625em solid #444; /* Darker border */
@@ -15,15 +16,27 @@
 
 .message-list {
     flex: 1;
-    overflow-y: auto;
-    scroll-behavior: smooth;
+    overflow-y: auto; /* Enable vertical scrolling */
+    scroll-behavior: smooth; /* Smooth scrolling for auto-scroll */
     padding: 0.625em;
     background-color: #2e2e2e; /* Darker background for message list */
+    max-height: 100%; /* Ensure it doesn't overflow its parent */
 }
 
 .message {
     margin-bottom: 0.625em;
 }
+
+.message-body ol {
+    color: #000000; /* Ensure ordered list text matches the default text color */
+    margin-left: 1.5em; /* Add some spacing for indentation */
+}
+
+.message-body li {
+    color: #000000; /* Ensure list items inherit the color from the parent */
+    margin-bottom: 0.5em; /* Add spacing between list items */
+}
+
 
 .chat-input {
     display: flex;
