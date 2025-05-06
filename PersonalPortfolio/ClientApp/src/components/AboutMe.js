@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import './AboutMe.css';
 
 const AboutMe = () => {
@@ -20,10 +20,10 @@ const AboutMe = () => {
             <div className="about-me-text-bubble">
                 <h1 className="about-me-title">About Me</h1>
                 <p className="about-me-text">
-                    I am a .NET AI Engineer with over two years of experience at Convergint, where I developed a variety of AI solutions. More recently, I've been working on some products I host through my start up, <a href="https://appliedai-org.github.io/homepage/">Applied AI</a>.
+                    I’m Jacob Thomas, a .NET AI engineer with 2+ years at Convergint where I built and scaled the "Convergint Virtual Assistant," boosting reliability and response relevancy. In 2024 I founded Applied AI and created The Intelligence Hub, an open-source API with RAG, agentic workflows, vision support, and much more.
                 </p>
                 <p className="about-me-text">
-                    I've worked across the stack, implementing anything from the front end for natural language filters, to RAG vector pipelines for enterprise grade chatbots.
+                    To get a better idea of my expertise and accomplishments, feel free to keep scrolling, download my resume from below, or have a discussion with my personal virtual assistant, StackSherpa.
                 </p>
                 <a
                     href="/resume.pdf"

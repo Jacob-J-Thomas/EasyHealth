@@ -37,30 +37,16 @@ function HomePage() {
                     <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/jacob-thomas-546268131/">My LinkedIn Profile</a>
                 </p>
                 <p>
-                    <strong>Follow me on X:</strong> <a href="https://x.com/JacobThoma38517">@JacobThoma38517</a>
+                    <strong>GitHub:</strong> <a href="https://github.com/Jacob-J-Thomas">My LinkedIn Profile</a>
                 </p>
                 <p>
-                    <strong>LLC Website:</strong> <a href="https://appliedai-org.github.io/homepage/">Applied AI Landing Page</a>
+                    <strong>Applied AI Website:</strong> <a href="https://appliedai-org.github.io/homepage/">Applied AI Landing Page</a>
                 </p>
                 <p>
-                    <strong>LLC Email:</strong> <a href="mailto:jacob.thomas@applied-ai-org.com">jacob.thomas@applied-ai-org.com</a>
+                    <strong>Applied AI Email:</strong> <a href="mailto:jacob.thomas@applied-ai-org.com">jacob.thomas@applied-ai-org.com</a>
                 </p>
                 <p>
-                    You can also check out my work on{' '}
-                    <a
-                        href="https://github.com/AppliedAI-Org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        My Startup's GitHub
-                    </a> and{' '}
-                    <a
-                        href="https://github.com/Jacob-J-Thomas"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        My Personal GitHub
-                    </a>.
+                    <strong>Applied AI GitHub:</strong> <a href="https://github.com/AppliedAI-Org">jacob.thomas@applied-ai-org.com</a>
                 </p>
             </section>
 

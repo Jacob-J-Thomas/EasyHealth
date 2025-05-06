@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at applied.ai.help@gmail.com.";
+const DefaultErrorMessage = "Something went wrong. If you continue to receive this error, please request support at jacob.thomas@applied-ai-org.com.";
 
 class ApiClient {
     constructor(baseUrl) {

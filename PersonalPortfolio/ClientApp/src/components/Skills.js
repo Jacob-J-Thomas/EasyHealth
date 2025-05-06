@@ -3,25 +3,19 @@ import './Skills.css';
 
 const Skills = () => {
     const skillsList = [  
-                 "C#",  
-                 ".NET 8",  
-                 "React",  
+                 ".NET (C#)",  
                  "JavaScript",  
-                 "HTML & CSS",  
-                 "SQL",  
-                 "Entity Framework",  
+                 "Python",
+                 "SQL",
+                 "React",
                  "Azure",  
-                 "Azure AI Services",  
-                 "Azure OpenAI",  
-                 "Git & GitHub",  
-                 "AI/ML Development",  
+                 "Azure AI Services", 
+                 "Azure OpenAI",
+                 "Git", 
+                 "HTML",
+                 "CSS",
                  "PyTorch",  
-                 "Python",  
-                 "Prompt Engineering",  
-                 "API Development",  
-                 "ASP.NET",  
-                 "OpenAI",  
-                 "Resilient Design & Disaster Recovery"  
+                 "Prompt Engineering" 
              ];
 
     return (
