@@ -3,6 +3,7 @@ import './ChatWindow.css';
 import { Message } from './Message';
 import authConfig from '../auth_config.json';
 import ApiClient from '../api/ApiClient';
+import emailjs from 'emailjs-com';
 
 function ChatWindow({ clearMessages }) {
     const [inputMessage, setInputMessage] = useState('');
@@ -16,6 +17,18 @@ function ChatWindow({ clearMessages }) {
     const [connection, setConnection] = useState(null);
     const chatEndRef = useRef(null);
     const profileName = 'portfolio-assistant';
+
+    const handleFeedback = (type, content) => {
+        emailjs.send(
+            'service_46i2oxe',
+            'template_eukcnxj',
+            {
+                feedback_type: type,
+                feedback_content: content,
+            },
+            'l4tPGVW0fU2gIrpaI'
+        )
+    };
 
     useEffect(() => {
         const setupSignalRConnection = async () => {
@@ -129,6 +142,7 @@ function ChatWindow({ clearMessages }) {
                         content={msg.content}
                         timestamp={msg.timestamp}
                         alignRight={msg.role === "Assistant"}
+                        onFeedback={handleFeedback}
                     />
                 ))}
                 <div ref={chatEndRef} />
