@@ -37,7 +37,7 @@ function HomePage() {
                     <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/jacob-thomas-546268131/">My LinkedIn Profile</a>
                 </p>
                 <p>
-                    <strong>GitHub:</strong> <a href="https://github.com/Jacob-J-Thomas">My LinkedIn Profile</a>
+                    <strong>GitHub:</strong> <a href="https://github.com/Jacob-J-Thomas">My GitHub Profile</a>
                 </p>
                 <p>
                     <strong>Applied AI Website:</strong> <a href="https://appliedai-org.github.io/homepage/">Applied AI Landing Page</a>

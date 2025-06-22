@@ -6,8 +6,7 @@ const Projects = () => {
         {
             title: "The Intelligence Hub API",
             description: "A single API to simplify and expedite AI app development, providing interoperability between LLM hosts, RAG dbs, image models, and more.",
-            githubLink: "https://github.com/AppliedAI-Org/IntelligenceHub.git",
-            liveLink: "https://appliedai-org.github.io/homepage/"
+            githubLink: "https://github.com/AppliedAI-Org/IntelligenceHub.git"
         },
         {
             title: "NLSequel",
