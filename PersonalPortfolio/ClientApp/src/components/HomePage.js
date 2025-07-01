@@ -46,7 +46,7 @@ function HomePage() {
                     <strong>Applied AI Email:</strong> <a href="mailto:jacob.thomas@applied-ai-org.com">jacob.thomas@applied-ai-org.com</a>
                 </p>
                 <p>
-                    <strong>Applied AI GitHub:</strong> <a href="https://github.com/AppliedAI-Org">jacob.thomas@applied-ai-org.com</a>
+                    <strong>Applied AI GitHub:</strong> <a href="https://github.com/AppliedAI-Org">Applied AI GitHub</a>
                 </p>
             </section>
 
