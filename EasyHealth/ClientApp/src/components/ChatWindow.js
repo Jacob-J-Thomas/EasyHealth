@@ -10,7 +10,7 @@ function ChatWindow({ clearMessages }) {
     const [messages, setMessages] = useState([
         {
             role: 'Assistant',
-            content: "Hi, Im the Easy Assistant! Your guide to all things Easy Health. Feel free to ask me to book and appointment, fill out a contact form, or just ask a question.",
+            content: "Hi, I'm the Easy Assistant, your guide to all things Easy Health! Feel free to ask me to help you: \n\n1. book an appointment \n\n2. Fill out a contact form \n\n3. Ask a question",
             timestamp: new Date().toISOString(),
         },
     ]);
