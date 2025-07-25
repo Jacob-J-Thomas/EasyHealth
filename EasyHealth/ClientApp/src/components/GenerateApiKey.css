@@ -49,7 +49,7 @@
     display: block;
     color: #ffffff;
     padding: 0.7rem 1rem; /* Adjust padding for consistent height */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Inter, sans-serif;
     display: flex;
     align-items: center; /* Center text vertically */
 }

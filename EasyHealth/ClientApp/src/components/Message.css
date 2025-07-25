@@ -36,7 +36,7 @@
     white-space: normal;
     max-width: fit-content;
     box-sizing: border-box;
-    background-color: #0f0f0f; /* Dark blue background for messages */
+    background-color: #f9f8f7; /* Dark blue background for messages */
 }
 
     .message p {
