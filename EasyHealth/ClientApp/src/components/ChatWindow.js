@@ -33,11 +33,10 @@ function ChatWindow({ clearMessages }) {
     };
 
     const handleToolPayload = (toolName, payload) => {
-        if (toolName === 'ContactUs') {
-            setBannerMessage('Success Contact form completed');
-        } else if (toolName === 'ScheduleDemo') {
-            setBannerMessage('Success, Demo Scheduled');
-        }
+        // Display which tool was executed so users know what happened
+        setBannerMessage(`Success: ${toolName}`);
+
+        // Clear the banner after a short period
         setTimeout(() => setBannerMessage(null), 5000);
     };
 
