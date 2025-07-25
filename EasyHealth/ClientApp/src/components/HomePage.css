@@ -1,0 +1,358 @@
+﻿/* Container & overall layout */
+.home-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Ensure the NavMenu is centered */
+.navbar {
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    text-align: center;
+    padding: 1em 0; /* Add some vertical padding */
+    box-sizing: border-box;
+}
+
+/* Ensure the navbar content container is centered */
+.navbar-content-container {
+    max-width: 1200px; /* Limit the width for better alignment */
+    margin: 0 auto; /* Center the container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
+/* Hero section styling */
+.hero-section {
+    width: 100%;
+    background: linear-gradient(135deg, #1d1f21, #2e2e2e);
+    color: #ffffff;
+    padding: 4em 2em;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5em;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.hero-section p {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    margin-bottom: 1.5em;
+}
+
+/* Section title styling */
+.section-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 0.5em;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Section subtitle styling */
+.section-subtitle {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #666666;
+    margin-bottom: 1.5em;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* Contact section links */
+.contact-section a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.contact-section p {
+    text-align: center;
+}
+
+    .contact-section a:hover {
+        text-decoration: underline;
+    }
+
+.signup-button {
+    position: relative;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    color: #ffffff;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: bold;
+    font-size: 1.25em;
+    border: 2px solid #ffffff;
+    background-color: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.9s ease, transform 0.9s ease, box-shadow 0.9s ease;
+}
+
+    /* Blue background animation (already in place) */
+    .signup-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #007bff;
+        z-index: -1;
+        transform: scaleX(0);
+        transition: transform 0.9s ease;
+    }
+
+    .signup-button:hover::before {
+        transform: scaleX(1);
+    }
+
+    .signup-button:hover {
+        border-color: #007bff;
+        /* Add glowing effect */
+        box-shadow: 0 0 8px 2px rgba(0, 123, 255, 0.8);
+    }
+
+    /* Shimmering effect */
+    .signup-button::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+        transform: skewX(-25deg);
+        transition: none;
+    }
+
+    /* Trigger the shimmer animation on hover */
+    .signup-button:hover::after {
+        animation: shimmer 1s forwards;
+    }
+
+/* Define the keyframes for the shimmer */
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Info section for pricing & features */
+.info-section {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center; /* Center items horizontally */
+    align-items: stretch; /* Stretch items to the same height */
+    width: 100%;
+    max-width: 80em;
+    padding: 3em 2em;
+    gap: 2em;
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+.pricing-table, .features {
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 2em;
+    flex: 1 1 300px;
+    box-sizing: border-box; /* Ensure padding and border are included */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensure content is spaced evenly */
+}
+
+    .pricing-table h2,
+    .features h2 {
+        font-family: 'Roboto Mono', monospace;
+        margin-bottom: 1em;
+        color: #333;
+    }
+
+    /* Pricing table styles */
+    .pricing-table table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    .pricing-table th,
+    .pricing-table td {
+        border: 1px solid #ddd;
+        padding: 0.75em;
+        text-align: center;
+    }
+
+    .pricing-table th {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    /* Features list styling */
+    .features ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .features li {
+        margin-bottom: 0.75em;
+        padding-left: 1.5em;
+        padding-top: .5rem;
+        position: relative;
+        color: #555;
+    }
+
+        .features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #007bff;
+        }
+
+
+
+/* Contact section styling with hover and animation effects */
+.contact-section {
+    background-color: #f7f7f7;
+    border-radius: 12px; /* Match the rounded corners */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Add depth */
+    padding: 2em;
+    max-width: 60vw;
+    margin: 2em auto 6rem;
+    text-align: left;
+    color: #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+}
+
+    .contact-section:hover {
+        transform: translateY(-5px); /* Lift effect on hover */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+    }
+
+    /* Contact section title and subtitle */
+    .contact-section h2 {
+        font-family: 'Roboto Mono', monospace;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333333;
+        margin-bottom: 0.5em;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .contact-section p {
+        font-size: 1rem;
+        margin-bottom: 0.5em;
+        text-align: left;
+    }
+
+    .contact-section a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s ease; /* Smooth color transition */
+    }
+
+        .contact-section a:hover {
+            color: #0056b3; /* Darker blue on hover */
+            text-decoration: underline;
+        }
+
+
+.about-and-window-wrapper {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping by default */
+    justify-content: space-between;
+    align-items: stretch; /* Ensure both components stretch to the same height */
+    gap: 1.5em;
+    width: 100%;
+    max-width: 80vw;
+    margin: 2em auto;
+    box-sizing: border-box;
+    height: 100%; /* Ensure the wrapper takes full height */
+}
+
+.about-me-container,
+.window-wrapper-container {
+    flex: 1 1 50%; /* Ensure both components take up equal width */
+    height: 100%; /* Match height */
+    min-height: 80vh;
+    max-height: 80vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.projects-container {
+    overflow: hidden; /* Prevent vertical overflow */
+    overflow-x: visible; /* Allow horizontal overflow */
+}
+
+/* Stack components vertically on smaller screens */
+@media (max-width: 1370px) {
+    .about-and-window-wrapper {
+        flex-direction: column; /* Stack components vertically */
+        gap: 1em; /* Adjust spacing between stacked components */
+    }
+
+    .about-me-container,
+    .window-wrapper-container {
+        flex: 1 1 100%; /* Take up full width */
+        max-width: 100%; /* Prevent horizontal overflow */
+        height: auto; /* Allow height to adjust naturally */
+        min-height: auto; /* Remove fixed height constraints */
+        max-height: none;
+    }
+}
+
+
+
+/* Responsive design */
+@media (max-width: 1370px) {
+    .contact-section {
+        max-width: 90vw;
+    }
+
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+
+    .hero-section p {
+        font-size: 1rem;
+    }
+
+    .info-section {
+        flex-direction: column;
+        padding: 2em;
+    }
+}

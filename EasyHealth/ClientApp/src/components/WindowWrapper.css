@@ -1,0 +1,102 @@
+﻿/* Container for the entire window wrapper */
+.window-wrapper-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding is included in width calculation */
+}
+
+/* Container for the fixed panes */
+.fixed-pane-container {
+    display: flex;
+    flex-direction: row; /* Arrange panes side by side */
+    width: 100%;
+    height: 100%;
+}
+
+/* Styling each pane inside the fixed container */
+.pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center; /* Center the content horizontally */
+    overflow: auto;
+    height: 100%;
+    width: 100%; /* Each pane takes up 50% of the width */
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.chatwindow-label {
+    display: block; /* Ensure the label is a block element */
+    margin-left: 1em;
+    margin-bottom: -.7em;
+    z-index: 1;
+    font-size: 2rem;
+    color: #e0e0e0; /* Light text color */
+}
+
+@media (max-width: 1200px) {
+    .fixed-pane-container {
+        flex-direction: column; /* Stack panes vertically */
+    }
+
+    .pane {
+        width: 100%; /* Each pane takes up 100% of the width */
+    }
+}
+
+/* Modal styles */
+.ReactModal__Overlay {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ReactModal__Content {
+    position: relative;
+    background: #2e2e2e;
+    color: #e0e0e0;
+    border-radius: 4px;
+    padding: 2em;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    outline: none;
+}
+
+    .ReactModal__Content h2 {
+        margin-top: 0;
+        font-size: 1.5em;
+    }
+
+    .ReactModal__Content p {
+        margin: 1em 0;
+    }
+
+    .ReactModal__Content button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5em 1em;
+        margin-right: 1em;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+        .ReactModal__Content button:hover {
+            background-color: #0056b3;
+        }
+
+        .ReactModal__Content button:last-child {
+            background-color: #6c757d;
+        }
+
+            .ReactModal__Content button:last-child:hover {
+                background-color: #5a6268;
+            }
