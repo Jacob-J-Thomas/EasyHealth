@@ -15,6 +15,8 @@ function ChatWindow({ clearMessages }) {
         },
     ]);
     const [connection, setConnection] = useState(null);
+    const [toolBuffers, setToolBuffers] = useState({});
+    const [bannerMessage, setBannerMessage] = useState(null);
     const chatEndRef = useRef(null);
     const profileName = 'easy-health-agent';
 
@@ -28,6 +30,14 @@ function ChatWindow({ clearMessages }) {
             },
             'l4tPGVW0fU2gIrpaI'
         )
+    };
+
+    const handleToolPayload = (toolName, payload) => {
+        // Display which tool was executed so users know what happened
+        setBannerMessage(`Success: ${toolName}`);
+
+        // Clear the banner after a short period
+        setTimeout(() => setBannerMessage(null), 5000);
     };
 
     useEffect(() => {
@@ -45,6 +55,23 @@ function ChatWindow({ clearMessages }) {
 
                 newConnection.on('broadcastMessage', (chunk) => {
                     console.log('Received chunk:', chunk); // Log the chunk data for debugging
+                    const toolCalls = chunk.toolCalls || chunk.ToolCalls;
+                    if (toolCalls) {
+                        setToolBuffers(prev => {
+                            const updated = { ...prev };
+                            Object.entries(toolCalls).forEach(([name, fragment]) => {
+                                updated[name] = (updated[name] || '') + fragment;
+                                try {
+                                    const payload = JSON.parse(updated[name]);
+                                    handleToolPayload(name, payload);
+                                    delete updated[name];
+                                } catch (e) {
+                                    // incomplete JSON, wait for more chunks
+                                }
+                            });
+                            return updated;
+                        });
+                    }
                     setMessages((prevMessages) => {
                         const lastMessage = prevMessages[prevMessages.length - 1];
                         if (lastMessage && lastMessage.role === 'Assistant') {
@@ -134,6 +161,9 @@ function ChatWindow({ clearMessages }) {
 
     return (
         <div className="chat-window">
+            {bannerMessage && (
+                <div className="banner-message">{bannerMessage}</div>
+            )}
             <div className="message-list">
                 {messages.map((msg, index) => (
                     <Message
