@@ -125,13 +125,6 @@ function ChatWindow({ clearMessages }) {
         }
     };
 
-    const handleClearMessages = () => {
-        setMessages([]); // Clear the messages state
-        if (clearMessages) {
-            clearMessages(); // Call the parent-provided clearMessages function if it exists
-        }
-    };
-
     return (
         <div className="chat-window">
             <div className="message-list">
