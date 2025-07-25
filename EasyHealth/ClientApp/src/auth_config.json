@@ -1,7 +1,7 @@
 {
   "domain": "applied-ai.us.auth0.com",
   "clientId": "goWB9hmpTxQH1hSXHJ7oShCLjE5degRh",
-  "audience": "https://intelligencehub-awcrbwdaccb9f8ch.centralus-01.azurewebsites.net",
+  "audience": "https://easyhealthdemo.azurewebsites.net",
   "scope": "openid profile email sub",
   "ApiUri": "https://easyhealthdemo.azurewebsites.net",
   "redirectUri": "https://easyhealthdemo.azurewebsites.net",
