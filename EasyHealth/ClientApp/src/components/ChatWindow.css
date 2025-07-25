@@ -102,6 +102,13 @@
     margin-right: 0.25em;
 }
 
-    .chat-input button:hover {
-        background-color: #0056b3;
-    }
+.chat-input button:hover {
+    background-color: #0056b3;
+}
+
+.banner-message {
+    background-color: #28a745;
+    color: #fff;
+    padding: 0.5em;
+    text-align: center;
+}

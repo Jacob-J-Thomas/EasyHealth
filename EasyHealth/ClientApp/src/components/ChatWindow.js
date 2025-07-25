@@ -15,6 +15,8 @@ function ChatWindow({ clearMessages }) {
         },
     ]);
     const [connection, setConnection] = useState(null);
+    const [toolBuffers, setToolBuffers] = useState({});
+    const [bannerMessage, setBannerMessage] = useState('');
     const chatEndRef = useRef(null);
     const profileName = 'easy-health-agent';
 
@@ -45,6 +47,28 @@ function ChatWindow({ clearMessages }) {
 
                 newConnection.on('broadcastMessage', (chunk) => {
                     console.log('Received chunk:', chunk); // Log the chunk data for debugging
+
+                    if (chunk.toolCalls) {
+                        setToolBuffers(prev => {
+                            const updated = { ...prev };
+                            Object.entries(chunk.toolCalls).forEach(([tool, value]) => {
+                                updated[tool] = (updated[tool] || '') + value;
+                                try {
+                                    JSON.parse(updated[tool]);
+                                    if (tool === 'ContactUs') {
+                                        setBannerMessage('Success Contact form completed');
+                                    } else if (tool === 'ScheduleDemo') {
+                                        setBannerMessage('Success, Demo Scheduled');
+                                    }
+                                    delete updated[tool];
+                                } catch (e) {
+                                    // wait for more chunks
+                                }
+                            });
+                            return updated;
+                        });
+                    }
+
                     setMessages((prevMessages) => {
                         const lastMessage = prevMessages[prevMessages.length - 1];
                         if (lastMessage && lastMessage.role === 'Assistant') {
@@ -94,6 +118,13 @@ function ChatWindow({ clearMessages }) {
         }
     }, [messages]);
 
+    useEffect(() => {
+        if (bannerMessage) {
+            const timer = setTimeout(() => setBannerMessage(''), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [bannerMessage]);
+
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) {
             return;
@@ -134,6 +165,9 @@ function ChatWindow({ clearMessages }) {
 
     return (
         <div className="chat-window">
+            {bannerMessage && (
+                <div className="banner-message">{bannerMessage}</div>
+            )}
             <div className="message-list">
                 {messages.map((msg, index) => (
                     <Message
