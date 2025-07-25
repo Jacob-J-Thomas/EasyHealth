@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 /* Resetting basic styles for consistency across browsers */
 * {
     margin: 0;
@@ -9,7 +10,7 @@
 html, body, #root, .App {
     height: 100%;
     width: 100%;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: #1e1e1e; /* Dark background for the app */
     color: #e0e0e0; /* Light text color for contrast */
     overflow-x: hidden;
