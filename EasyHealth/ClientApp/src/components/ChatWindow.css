@@ -54,7 +54,7 @@
 
 .chat-input input:focus {
     outline: none;
-    box-shadow: 0 0 10px 2px rgba(0, 123, 255, 0.5); /* Light blue glow */
+    box-shadow: 0 0 10px 2px #003459; /* Light blue glow */
 }
 
 .chat-input input {
@@ -103,5 +103,5 @@
 }
 
     .chat-input button:hover {
-        background-color: #0056b3;
+        background-color: #003459;
     }
