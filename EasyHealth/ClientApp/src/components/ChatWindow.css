@@ -105,3 +105,37 @@
     .chat-input button:hover {
         background-color: #003459;
     }
+
+
+.banner-message {
+    background-color: #28a745; /* Green background */
+    color: white;
+    padding: 0.75em;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 0.25em;
+    margin: 0.5em;
+    animation: fade-in-out 5s ease-in-out;
+}
+
+@keyframes fade-in-out {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}

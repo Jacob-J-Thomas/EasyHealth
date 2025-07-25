@@ -26,7 +26,7 @@ export class NavMenu extends Component {
                 <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom mb-3" container light>
                     <div className="navbar-content-container">
                         <div className="text-center-container">
-                            <NavbarBrand tag={Link} to="/" className="navbar-title">Easy Health Demo</NavbarBrand>
+                            <NavbarBrand tag={Link} to="/" className="navbar-title">Easy Health Assistant Demo</NavbarBrand>
                         </div>
                     </div>
                 </Navbar>

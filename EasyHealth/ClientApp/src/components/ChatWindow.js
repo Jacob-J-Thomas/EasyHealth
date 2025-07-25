@@ -5,7 +5,7 @@ import authConfig from '../auth_config.json';
 import ApiClient from '../api/ApiClient';
 import emailjs from 'emailjs-com';
 
-function ChatWindow({ clearMessages }) {
+function ChatWindow() {
     const [inputMessage, setInputMessage] = useState('');
     const [messages, setMessages] = useState([
         {
@@ -15,6 +15,9 @@ function ChatWindow({ clearMessages }) {
         },
     ]);
     const [connection, setConnection] = useState(null);
+    const [toolBuffers, setToolBuffers] = useState({});
+    const [bannerMessage, setBannerMessage] = useState(null);
+    const processedToolsRef = useRef(new Set());
     const chatEndRef = useRef(null);
     const profileName = 'easy-health-agent';
 
@@ -29,6 +32,57 @@ function ChatWindow({ clearMessages }) {
             'l4tPGVW0fU2gIrpaI'
         )
     };
+
+    const handleToolPayload = (toolName, payload) => {
+        const followUp = "The appointment has been scheduled. Let me know if you need anything else!";
+        const email = payload.WorkEmail || payload.EmailAddress;
+        const fullName = payload.FullName || payload.fullName || "Valued Customer";
+
+        if (email) {
+            emailjs.send(
+                'service_46i2oxe',
+                'template_1jt9jq6', // Replace with your actual template
+                {
+                    to_email: email,
+                    name: fullName,
+                    subject: "Appointment Scheduled"
+                },
+                'l4tPGVW0fU2gIrpaI'
+            ).then(
+                () => console.log("Confirmation email sent to", email),
+                (err) => console.error("Email send failed:", err)
+            );
+        }
+
+        setBannerMessage(`Success: ${toolName}`);
+        setTimeout(() => setBannerMessage(null), 3500);
+
+        setMessages(prevMessages => {
+            const updatedMessages = [...prevMessages];
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
+
+            if (
+                lastMessage &&
+                lastMessage.role === 'Assistant' &&
+                (!lastMessage.content || lastMessage.content.trim() === "")
+            ) {
+                updatedMessages[updatedMessages.length - 1] = {
+                    ...lastMessage,
+                    content: followUp,
+                    timestamp: new Date().toISOString()
+                };
+            } else {
+                updatedMessages.push({
+                    role: 'Assistant',
+                    content: followUp,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            return updatedMessages;
+        });
+    };
+
 
     useEffect(() => {
         const setupSignalRConnection = async () => {
@@ -45,6 +99,34 @@ function ChatWindow({ clearMessages }) {
 
                 newConnection.on('broadcastMessage', (chunk) => {
                     console.log('Received chunk:', chunk); // Log the chunk data for debugging
+                    const toolCalls = chunk.toolCalls || chunk.ToolCalls;
+                    console.log('Received chunk:', chunk);
+                    console.log('toolCalls:', chunk.toolCalls);
+                    console.log('ToolCalls:', chunk.ToolCalls);
+
+                    if (toolCalls && typeof toolCalls === 'object' && Object.keys(toolCalls).length > 0) {
+                        setToolBuffers(prev => {
+                            const updated = { ...prev };
+                            Object.entries(toolCalls).forEach(([name, fragment]) => {
+                                updated[name] = fragment;
+
+                                try {
+                                    console.log(`Trying to parse payload for ${name}:`, updated[name]);
+                                    const payload = JSON.parse(updated[name]);
+
+                                    if (!processedToolsRef.current.has(name)) {
+                                        processedToolsRef.current.add(name);
+                                        handleToolPayload(name, payload);
+                                    }
+
+                                    delete updated[name];
+                                } catch (e) {
+                                    // Still incomplete JSON — wait for more chunks
+                                }
+                            });
+                            return updated;
+                        });
+                    }
                     setMessages((prevMessages) => {
                         const lastMessage = prevMessages[prevMessages.length - 1];
                         if (lastMessage && lastMessage.role === 'Assistant') {
@@ -127,6 +209,11 @@ function ChatWindow({ clearMessages }) {
 
     return (
         <div className="chat-window">
+            {bannerMessage && (
+                <div className="banner-message">
+                    {bannerMessage}
+                </div>
+            )}
             <div className="message-list">
                 {messages.map((msg, index) => (
                     <Message
