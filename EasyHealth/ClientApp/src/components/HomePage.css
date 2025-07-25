@@ -5,7 +5,7 @@
     align-items: center;
     width: 100%;
     height: 100vh;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -36,7 +36,7 @@
 /* Hero section styling */
 .hero-section {
     width: 100%;
-    background: linear-gradient(135deg, #1d1f21, #2e2e2e);
+    background: linear-gradient(135deg, #003459, #3898ec);
     color: #ffffff;
     padding: 4em 2em;
     text-align: center;
@@ -50,7 +50,7 @@
 .hero-section h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5em;
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Playfair Display', serif;
 }
 
 .hero-section p {
@@ -61,10 +61,10 @@
 
 /* Section title styling */
 .section-title {
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Playfair Display', serif;
     font-size: 2rem;
     font-weight: bold;
-    color: #333333;
+    color: #003459;
     margin-bottom: 0.5em;
     text-align: center;
     text-transform: uppercase;
@@ -73,10 +73,10 @@
 
 /* Section subtitle styling */
 .section-subtitle {
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 1.2rem;
     font-weight: 400;
-    color: #666666;
+    color: #5d6c7b;
     margin-bottom: 1.5em;
     text-align: center;
     line-height: 1.6;
@@ -84,7 +84,7 @@
 
 /* Contact section links */
 .contact-section a {
-    color: #007bff;
+    color: #3898ec;
     text-decoration: none;
     font-weight: bold;
 }
@@ -95,6 +95,7 @@
 
     .contact-section a:hover {
         text-decoration: underline;
+        color: #28a8df;
     }
 
 .signup-button {
@@ -102,7 +103,7 @@
     display: inline-block;
     padding: 0.25rem 0.5rem;
     color: #ffffff;
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Playfair Display', serif;
     font-weight: bold;
     font-size: 1.25em;
     border: 2px solid #ffffff;
@@ -119,7 +120,7 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: #007bff;
+        background-color: #3898ec;
         z-index: -1;
         transform: scaleX(0);
         transition: transform 0.9s ease;
@@ -130,9 +131,9 @@
     }
 
     .signup-button:hover {
-        border-color: #007bff;
+        border-color: #3898ec;
         /* Add glowing effect */
-        box-shadow: 0 0 8px 2px rgba(0, 123, 255, 0.8);
+        box-shadow: 0 0 8px 2px rgba(56, 152, 236, 0.8);
     }
 
     /* Shimmering effect */
@@ -191,9 +192,9 @@
 
     .pricing-table h2,
     .features h2 {
-        font-family: 'Roboto Mono', monospace;
+        font-family: 'Playfair Display', serif;
         margin-bottom: 1em;
-        color: #333;
+        color: #003459;
     }
 
     /* Pricing table styles */
@@ -212,7 +213,7 @@
     }
 
     .pricing-table th {
-        background-color: #007bff;
+        background-color: #3898ec;
         color: #fff;
     }
 
@@ -235,7 +236,7 @@
             content: "✓";
             position: absolute;
             left: 0;
-            color: #007bff;
+            color: #3898ec;
         }
 
 
@@ -260,10 +261,10 @@
 
     /* Contact section title and subtitle */
     .contact-section h2 {
-        font-family: 'Roboto Mono', monospace;
+        font-family: 'Playfair Display', serif;
         font-size: 2rem;
         font-weight: bold;
-        color: #333333;
+        color: #003459;
         margin-bottom: 0.5em;
         text-align: center;
         text-transform: uppercase;
@@ -277,14 +278,14 @@
     }
 
     .contact-section a {
-        color: #007bff;
+        color: #3898ec;
         text-decoration: none;
         font-weight: bold;
         transition: color 0.3s ease; /* Smooth color transition */
     }
 
         .contact-section a:hover {
-            color: #0056b3; /* Darker blue on hover */
+            color: #28a8df; /* Darker blue on hover */
             text-decoration: underline;
         }
 

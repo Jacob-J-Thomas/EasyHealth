@@ -18,7 +18,7 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: #007bff; /* Blue fill */
+        background-color: #3898ec; /* Blue fill */
         z-index: -1; /* Place behind the button text */
         transform: scaleX(0); /* Start invisible */
         transition: transform 0.9s ease;
@@ -29,5 +29,5 @@
     }
 
     .logout-button:hover {
-        border-color: #007bff; /* Border animates from black to blue on hover */
+        border-color: #3898ec; /* Border animates from black to blue on hover */
     }
