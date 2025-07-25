@@ -14,6 +14,13 @@
     margin-bottom: inherit;
 }
 
+.banner-message {
+    background-color: #28a745;
+    color: #fff;
+    text-align: center;
+    padding: 0.5em;
+}
+
 .message-list {
     flex: 1;
     overflow-y: auto; /* Enable vertical scrolling */
