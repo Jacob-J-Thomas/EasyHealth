@@ -17,7 +17,7 @@ export class Message extends Component {
         const { author, content, alignRight } = this.props;
         const alignmentClass = alignRight ? 'align-left' : 'align-right';
         const messageStyle = {
-            backgroundColor: alignRight ? '#ebebeb' : '#007bff' 
+            backgroundColor: alignRight ? '#ebebeb' : '#3898ec'
         };
 
         return (

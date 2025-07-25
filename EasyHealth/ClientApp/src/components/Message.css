@@ -1,13 +1,13 @@
-﻿.message-container {
+.message-container {
     max-width: 75%;
     width: fit-content;
-    background-color: #2e2e2e; /* Darker background for message container */
-    color: #e0e0e0; /* Light text color for contrast */
+    background-color: #c9d6ee; /* Light background */
+    color: #003459; /* Dark text color */
 }
 
     .message-container.align-left {
         margin-right: auto;
-        color: #e0e0e0;
+        color: #003459;
     }
 
         .message-container.align-left .message {
@@ -16,7 +16,7 @@
 
     .message-container.align-right {
         margin-left: auto;
-        color: #e0e0e0;
+        color: #003459;
     }
 
     .message-container.align-right .message {
@@ -36,7 +36,7 @@
     white-space: normal;
     max-width: fit-content;
     box-sizing: border-box;
-    background-color: #0f0f0f; /* Dark blue background for messages */
+    background-color: #ffffff; /* Message background */
 }
 
     .message p {

@@ -26,8 +26,8 @@
     overflow: auto;
     height: 100%;
     width: 100%; /* Each pane takes up 50% of the width */
-    background-color: #1e1e1e;
-    color: #e0e0e0;
+    background-color: #fafafa;
+    color: #003459;
 }
 
 .chatwindow-label {
@@ -36,7 +36,7 @@
     margin-bottom: -.7em;
     z-index: 1;
     font-size: 2rem;
-    color: #e0e0e0; /* Light text color */
+    color: #003459; /* Text color */
 }
 
 @media (max-width: 1200px) {
@@ -59,8 +59,8 @@
 
 .ReactModal__Content {
     position: relative;
-    background: #2e2e2e;
-    color: #e0e0e0;
+    background: #ffffff;
+    color: #003459;
     border-radius: 4px;
     padding: 2em;
     width: 80%;
@@ -79,7 +79,7 @@
     }
 
     .ReactModal__Content button {
-        background-color: #007bff;
+        background-color: #3898ec;
         color: white;
         border: none;
         padding: 0.5em 1em;
@@ -90,7 +90,7 @@
     }
 
         .ReactModal__Content button:hover {
-            background-color: #0056b3;
+            background-color: #28a8df;
         }
 
         .ReactModal__Content button:last-child {

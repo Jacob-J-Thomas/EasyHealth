@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap');
 
 .navbar {
     background-color: #f9f8f7;
@@ -6,7 +6,7 @@
     flex-direction: row; /* Align items horizontally */
     justify-content: space-between; /* Ensure space between the brand and nav items */
     align-items: center;
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Inter', sans-serif;
     position: relative;
     width: 100vw; /* Full viewport width */
     padding: 1em 2em;
@@ -43,10 +43,10 @@ a.navbar-brand {
 
 /* Navbar title styling */
 .navbar-title {
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Playfair Display', serif;
     font-size: 2.5rem;
     font-weight: bold;
-    color: #000000;
+    color: #003459;
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -57,15 +57,15 @@ a.navbar-brand {
 
     .navbar-title:hover {
         transition: 200ms;
-        color: #007bff;
+        color: #28a8df;
     }
 
 /* Navbar subtitle styling */
 .navbar-subtitle {
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 1.2rem;
     font-weight: 400;
-    color: #666666;
+    color: #5d6c7b;
     margin-top: 0.5rem;
     text-align: center;
     letter-spacing: 0.5px;
@@ -116,7 +116,7 @@ a.navbar-brand {
             bottom: -3px; /* Position the underline just below the text */
             width: 0;
             height: 2px;
-            background-color: #007bff;
+            background-color: #3898ec;
             transition: width 0.3s ease; /* Smooth underline animation */
         }
 
