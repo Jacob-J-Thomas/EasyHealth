@@ -15,7 +15,7 @@ function ChatWindow() {
         },
     ]);
     const [connection, setConnection] = useState(null);
-    const [setToolBuffers] = useState({});
+    const [, setToolBuffers] = useState({});
     const [bannerMessage, setBannerMessage] = useState(null);
     const processedToolsRef = useRef(new Set());
     const chatEndRef = useRef(null);

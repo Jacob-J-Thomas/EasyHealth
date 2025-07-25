@@ -1,11 +1,7 @@
 import React from 'react';
-import FooterSection from './FooterSection';
 import { NavMenu } from './NavMenu';
 import './HomePage.css';
 import WindowWrapper from './WindowWrapper';
-import AboutMe from './AboutMe';
-import Projects from './Projects';
-import Skills from './Skills';
 
 function HomePage() {
     return (
